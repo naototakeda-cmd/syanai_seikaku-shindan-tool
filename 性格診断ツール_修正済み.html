@@ -313,15 +313,8 @@
 </div>
 
 <script>
-// ===== API Key (GitHubリポジトリで管理 - キーを更新する際はこの1行を書き換える) =====
-const CLAUDE_API_KEY = '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';
-
-// ===== GitHub設定 (医院テンプレートをリポジトリのclinics.jsonで管理) =====
-const GITHUB_TOKEN = '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'; // GitHub Personal Access Token
-const GITHUB_OWNER = 'naototakeda-cmd'; // GitHubユーザー名（例: pitatto-saiyo）
-const GITHUB_REPO  = 'syanai_seikaku-shindan-tool';    // リポジトリ名
-const GITHUB_FILE  = 'clinics.json';
-const GITHUB_API   = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`;
+// ===== Cloudflare Worker URL (デプロイ後にここを書き換える) =====
+const WORKER_URL = 'syanai-seikaku-shindan.naoto-takeda.workers.dev'; // 例: https://seikaku-shindan.naototakeda-cmd.workers.dev
 
 // 医院データのメモリキャッシュ（SHAはファイル更新時に必須）
 let clinicsData = {};
@@ -530,27 +523,22 @@ function setClinicData(data) {
   document.getElementById('workEnvironment').value = data.workEnvironment || '';
   document.getElementById('managementStyle').value = data.managementStyle || '';
 }
-// ===== GitHub API: clinics.json を取得 =====
+// ===== Worker経由: clinics.json を取得 =====
 async function fetchClinicsFromGitHub() {
-  // GitHub設定が未完了の場合はスキップ（エラーを出さず空データで動作）
-  if (GITHUB_TOKEN === 'YOUR_GITHUB_PAT_HERE' || GITHUB_OWNER === 'YOUR_GITHUB_OWNER_HERE') {
+  // Worker URLが未設定の場合はスキップ
+  if (WORKER_URL === 'YOUR_WORKER_URL_HERE') {
     clinicsData = {};
     clinicsFileSha = null;
     return;
   }
   try {
-    const res = await fetch(GITHUB_API, {
-      headers: {
-        'Authorization': `token ${GITHUB_TOKEN}`,
-        'Accept': 'application/vnd.github.v3+json'
-      }
-    });
+    const res = await fetch(`${WORKER_URL}/api/clinics`);
     if (res.status === 404) {
       clinicsData = {};
       clinicsFileSha = null;
       return;
     }
-    if (!res.ok) throw new Error(`GitHub API error: ${res.status}`);
+    if (!res.ok) throw new Error(`Worker error: ${res.status}`);
     const json = await res.json();
     clinicsFileSha = json.sha;
     clinicsData = JSON.parse(decodeURIComponent(escape(atob(json.content.replace(/\n/g, '')))));
@@ -559,27 +547,23 @@ async function fetchClinicsFromGitHub() {
   }
 }
 
-// ===== GitHub API: clinics.json を更新 =====
+// ===== Worker経由: clinics.json を更新 =====
 async function saveClinicsToGitHub() {
-  if (GITHUB_TOKEN === 'YOUR_GITHUB_PAT_HERE' || GITHUB_OWNER === 'YOUR_GITHUB_OWNER_HERE') {
-    throw new Error('GitHub設定が未完了です。HTMLファイル内の GITHUB_TOKEN と GITHUB_OWNER を設定してください。');
+  if (WORKER_URL === 'YOUR_WORKER_URL_HERE') {
+    throw new Error('Worker URLが未設定です。HTMLファイル内の WORKER_URL を設定してください。');
   }
   const content = btoa(unescape(encodeURIComponent(JSON.stringify(clinicsData, null, 2))));
   const body = { message: '医院テンプレートを更新', content };
   if (clinicsFileSha) body.sha = clinicsFileSha;
 
-  const res = await fetch(GITHUB_API, {
+  const res = await fetch(`${WORKER_URL}/api/clinics`, {
     method: 'PUT',
-    headers: {
-      'Authorization': `token ${GITHUB_TOKEN}`,
-      'Accept': 'application/vnd.github.v3+json`,
-      'Content-Type': 'application/json'
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || `GitHub API error: ${res.status}`);
+    throw new Error(err.message || `Worker error: ${res.status}`);
   }
   const data = await res.json();
   clinicsFileSha = data.content.sha;
@@ -891,8 +875,7 @@ ${parsedDirector ? `
 
 // ===== Generate Report =====
 async function generateReport() {
-  const apiKey = CLAUDE_API_KEY;
-  if (!apiKey || apiKey === 'YOUR_API_KEY_HERE') { showError('APIキーが設定されていません。HTMLファイル内の CLAUDE_API_KEY を更新してください。'); return; }
+  if (!WORKER_URL || WORKER_URL === 'YOUR_WORKER_URL_HERE') { showError('Worker URLが設定されていません。HTMLファイル内の WORKER_URL を更新してください。'); return; }
   if (!document.getElementById('clinicName').value) { showError('医院名を入力してください。'); return; }
   if (!parsedCandidate) { showError('候補者のスプレッドシートデータを貼り付けてください。'); return; }
 
@@ -908,14 +891,9 @@ async function generateReport() {
   errorMsg.classList.remove('active');
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch(`${WORKER_URL}/api/generate`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 8000,
