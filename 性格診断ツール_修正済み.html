@@ -15,6 +15,11 @@
   header h1 { font-size: 24px; font-weight: 700; }
   header p { font-size: 14px; color: #86868b; margin-top: 8px; }
   .internal-badge { display: inline-block; background: #ff3b30; color: #fff; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; margin-bottom: 8px; letter-spacing: 0.05em; }
+  .director-section { border: 1px solid #f0d9b0; border-radius: 12px; margin-top: 16px; overflow: hidden; }
+  .director-section summary { padding: 12px 16px; font-size: 14px; font-weight: 600; cursor: pointer; color: #6b4d00; background: #fff8e8; list-style: none; display: flex; align-items: center; gap: 8px; }
+  .director-section summary::before { content: '▶'; font-size: 10px; transition: transform 0.2s; }
+  .director-section[open] summary::before { transform: rotate(90deg); }
+  .director-section .inner { padding: 16px; background: #fff; }
 
   .tabs { display: flex; margin-bottom: 24px; border-radius: 12px; overflow: hidden; border: 1px solid #d2d2d7; background: #fff; }
   .tab { flex: 1; padding: 14px; text-align: center; cursor: pointer; font-size: 13px; font-weight: 600; background: #fff; color: #86868b; border: none; transition: all 0.2s; }
@@ -141,9 +146,8 @@
   <!-- Tabs -->
   <div class="tabs">
     <button class="tab active" data-tab="clinic" onclick="switchTab('clinic')">① 医院</button>
-    <button class="tab" data-tab="director" onclick="switchTab('director')">② 院長診断</button>
-    <button class="tab" data-tab="candidate" onclick="switchTab('candidate')">③ 候補者</button>
-    <button class="tab" data-tab="generate" onclick="switchTab('generate')">④ 生成</button>
+    <button class="tab" data-tab="candidate" onclick="switchTab('candidate')">② 候補者</button>
+    <button class="tab" data-tab="generate" onclick="switchTab('generate')">③ 生成</button>
   </div>
 
   <!-- Section 1: Clinic -->
@@ -187,43 +191,35 @@
         <textarea id="managementStyle" placeholder="例：細かく指導するタイプ、自主性を重んじる、定期的な面談あり"></textarea>
       </div>
     </div>
-    <button class="btn-primary" onclick="switchTab('director')">次へ：院長診断 →</button>
-  </div>
-
-  <!-- Section 2: Director Assessment -->
-  <div class="section" id="section-director">
-    <div class="card">
-      <h2><span class="icon">👨‍⚕️</span>院長の性格診断データ</h2>
-      <p style="font-size:13px; color:#86868b; margin-bottom:16px;">
-        院長の性格診断スプシデータを貼り付けてください（ヘッダー行ごとOK）<br>
-        ※ 候補者との相性分析に使用します。任意項目です。
-      </p>
-
-      <div class="paste-area paste-area-director" onclick="document.getElementById('directorPasteInput').focus()">
-        <div id="directorPastePrompt">
-          <div class="paste-icon">👨‍⚕️</div>
-          <div class="paste-label">院長のスプシデータを貼り付け</div>
-          <div class="paste-hint">設問数は何問でもOK（自動検出します）</div>
+    <!-- 院長の性格診断データ（任意・医院ごとに保存） -->
+    <details class="director-section" id="directorSection">
+      <summary>👨‍⚕️ 院長の性格診断データ（任意）</summary>
+      <div class="inner">
+        <p style="font-size:13px; color:#86868b; margin-bottom:12px;">
+          院長の性格診断スプシデータを貼り付けてください（ヘッダー行ごとOK）<br>
+          ※ 候補者との相性分析に使用します。医院を保存すると一緒に保存されます。
+        </p>
+        <div class="paste-area paste-area-director" onclick="document.getElementById('directorPasteInput').focus()">
+          <div id="directorPastePrompt">
+            <div class="paste-icon">👨‍⚕️</div>
+            <div class="paste-label">院長のスプシデータを貼り付け</div>
+            <div class="paste-hint">設問数は何問でもOK（自動検出します）</div>
+          </div>
+          <textarea id="directorPasteInput" placeholder="院長のスプシデータをここに貼り付け..."></textarea>
         </div>
-        <textarea id="directorPasteInput" placeholder="院長のスプシデータをここに貼り付け..."></textarea>
+        <div id="directorParseMessage"></div>
+        <div class="parsed-preview hidden" id="directorParsedPreview">
+          <div class="parsed-name director" id="directorParsedName"></div>
+          <div class="parsed-date" id="directorParsedDate"></div>
+          <div class="parsed-scores" id="directorParsedScores"></div>
+        </div>
       </div>
+    </details>
 
-      <div id="directorParseMessage"></div>
-
-      <div class="parsed-preview hidden" id="directorParsedPreview">
-        <div class="parsed-name director" id="directorParsedName"></div>
-        <div class="parsed-date" id="directorParsedDate"></div>
-        <div class="parsed-scores" id="directorParsedScores"></div>
-      </div>
-    </div>
-
-    <div style="display:flex; gap:8px;">
-      <button class="btn-secondary" onclick="switchTab('clinic')" style="border-color:#d2d2d7; color:#515154;">← 戻る</button>
-      <button class="btn-primary" onclick="switchTab('candidate')">次へ：候補者 →</button>
-    </div>
+    <button class="btn-primary" onclick="switchTab('candidate')">次へ：候補者 →</button>
   </div>
 
-  <!-- Section 3: Candidate -->
+  <!-- Section 2: Candidate -->
   <div class="section" id="section-candidate">
     <div class="card">
       <h2><span class="icon">📋</span>候補者の性格診断データ</h2>
@@ -271,7 +267,7 @@
     </div>
 
     <div style="display:flex; gap:8px;">
-      <button class="btn-secondary" onclick="switchTab('director')" style="border-color:#d2d2d7; color:#515154;">← 戻る</button>
+      <button class="btn-secondary" onclick="switchTab('clinic')" style="border-color:#d2d2d7; color:#515154;">← 戻る</button>
       <button class="btn-primary" onclick="switchTab('generate')">次へ：レポート生成 →</button>
     </div>
   </div>
@@ -512,6 +508,7 @@ function getClinicData() {
     idealCandidate: document.getElementById('idealCandidate').value,
     workEnvironment: document.getElementById('workEnvironment').value,
     managementStyle: document.getElementById('managementStyle').value,
+    directorData: parsedDirector || null,
   };
 }
 function setClinicData(data) {
@@ -522,6 +519,26 @@ function setClinicData(data) {
   document.getElementById('idealCandidate').value = data.idealCandidate || '';
   document.getElementById('workEnvironment').value = data.workEnvironment || '';
   document.getElementById('managementStyle').value = data.managementStyle || '';
+  // 院長データを復元
+  if (data.directorData) {
+    parsedDirector = data.directorData;
+    document.getElementById('directorPasteInput').value = '';
+    document.getElementById('directorParsedPreview').classList.remove('hidden');
+    renderScorePreview(
+      parsedDirector,
+      document.getElementById('directorParsedName'),
+      document.getElementById('directorParsedDate'),
+      document.getElementById('directorParsedScores')
+    );
+    document.getElementById('directorParseMessage').innerHTML =
+      `<div class="parse-success">読み取り済み: <strong>${parsedDirector.name}</strong> 院長（${parsedDirector.scores.length}問）</div>`;
+    document.getElementById('directorSection').open = true;
+  } else {
+    parsedDirector = null;
+    document.getElementById('directorPasteInput').value = '';
+    document.getElementById('directorParsedPreview').classList.add('hidden');
+    document.getElementById('directorParseMessage').innerHTML = '';
+  }
 }
 // ===== Worker経由: clinics.json を取得 =====
 async function fetchClinicsFromGitHub() {
