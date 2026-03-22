@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>性格診断レポート生成ツール</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', sans-serif;
+    background: #f5f5f7; color: #1d1d1f; line-height: 1.6;
+  }
+  .container { max-width: 800px; margin: 0 auto; padding: 24px 16px; }
+  header { text-align: center; padding: 32px 0 24px; }
+  header h1 { font-size: 24px; font-weight: 700; }
+  header p { font-size: 14px; color: #86868b; margin-top: 8px; }
+  .internal-badge { display: inline-block; background: #ff3b30; color: #fff; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; margin-bottom: 8px; letter-spacing: 0.05em; }
+
+  .tabs { display: flex; margin-bottom: 24px; border-radius: 12px; overflow: hidden; border: 1px solid #d2d2d7; background: #fff; }
+  .tab { flex: 1; padding: 14px; text-align: center; cursor: pointer; font-size: 13px; font-weight: 600; background: #fff; color: #86868b; border: none; transition: all 0.2s; }
+  .tab.active { background: #0071e3; color: #fff; }
+  .tab:not(.active):hover { background: #f0f0f5; }
+
+  .section { display: none; }
+  .section.active { display: block; }
+
+  .card { background: #fff; border-radius: 16px; padding: 24px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .card h2 { font-size: 17px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 13px; font-weight: 600; color: #1d1d1f; margin-bottom: 6px; }
+  .form-group input, .form-group textarea, .form-group select {
+    width: 100%; padding: 12px 14px; border: 1px solid #d2d2d7; border-radius: 10px;
+    font-size: 15px; font-family: inherit; background: #fafafa; transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+    outline: none; border-color: #0071e3; box-shadow: 0 0 0 3px rgba(0,113,227,0.15); background: #fff;
+  }
+  .form-group textarea { min-height: 80px; resize: vertical; }
+  .form-group .hint { font-size: 12px; color: #86868b; margin-top: 4px; }
+
+
+  .btn-primary { width: 100%; padding: 16px; border: none; border-radius: 14px; font-size: 17px; font-weight: 700; cursor: pointer; background: #0071e3; color: #fff; transition: all 0.2s; margin-top: 8px; }
+  .btn-primary:hover { background: #0077ed; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,113,227,0.3); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-primary:disabled { background: #d2d2d7; color: #86868b; cursor: not-allowed; transform: none; box-shadow: none; }
+  .btn-secondary { width: 100%; padding: 14px; border: 2px solid #0071e3; border-radius: 14px; font-size: 15px; font-weight: 700; cursor: pointer; background: #fff; color: #0071e3; transition: all 0.2s; margin-top: 8px; }
+  .btn-secondary:hover { background: #f0f7ff; }
+
+  .loading { display: none; text-align: center; padding: 40px 20px; }
+  .loading.active { display: block; }
+  .spinner { width: 40px; height: 40px; border: 3px solid #e8e8ed; border-top-color: #0071e3; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .result-area { display: none; }
+  .result-area.active { display: block; }
+  .result-header { display: flex; gap: 8px; margin-bottom: 12px; }
+  .result-header button { flex: 1; padding: 12px; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .btn-copy { background: #34c759; color: #fff; }
+  .btn-copy:hover { background: #2db84d; }
+  .btn-copy.copied { background: #515154; }
+  .btn-reset { background: #e8e8ed; color: #1d1d1f; }
+  .btn-reset:hover { background: #d2d2d7; }
+  .result-content {
+    background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    font-size: 14px; line-height: 1.8; max-height: 70vh; overflow-y: auto;
+  }
+  .result-content h1 { font-size: 20px; margin: 20px 0 10px; font-weight: 700; }
+  .result-content h2 { font-size: 17px; margin: 24px 0 8px; font-weight: 700; border-bottom: 1px solid #e8e8ed; padding-bottom: 6px; }
+  .result-content h3 { font-size: 15px; margin: 16px 0 6px; font-weight: 700; }
+  .result-content p { margin: 6px 0; }
+  .result-content table { border-collapse: collapse; width: 100%; margin: 10px 0; }
+  .result-content th, .result-content td { border: 1px solid #d2d2d7; padding: 8px 12px; text-align: left; font-size: 13px; }
+  .result-content th { background: #f5f5f7; font-weight: 600; }
+  .result-content ul { margin: 8px 0; padding-left: 20px; }
+  .result-content li { margin: 4px 0; }
+  .result-content hr { border: none; border-top: 1px solid #e8e8ed; margin: 16px 0; }
+
+  .error-msg { background: #fff2f2; border: 1px solid #ff3b30; border-radius: 12px; padding: 16px; color: #ff3b30; font-size: 14px; margin-top: 12px; display: none; }
+  .error-msg.active { display: block; }
+
+  .template-bar { display: flex; gap: 8px; margin-bottom: 16px; align-items: center; }
+  .template-bar select { flex: 1; padding: 10px 12px; border: 1px solid #d2d2d7; border-radius: 10px; font-size: 14px; background: #fff; }
+  .template-bar button { padding: 10px 14px; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+  .btn-template-save { background: #0071e3; color: #fff; }
+  .btn-template-save:hover { background: #0077ed; }
+  .btn-template-delete { background: #ff3b30; color: #fff; }
+  .btn-template-delete:hover { background: #e0352c; }
+
+  .paste-area {
+    border: 2px dashed #d2d2d7; border-radius: 12px; padding: 24px; text-align: center;
+    background: #fafafa; cursor: pointer; transition: all 0.2s; min-height: 100px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+  }
+  .paste-area:hover { border-color: #0071e3; background: #f0f7ff; }
+  .paste-area .paste-icon { font-size: 28px; }
+  .paste-area .paste-label { font-size: 14px; font-weight: 600; color: #515154; }
+  .paste-area .paste-hint { font-size: 12px; color: #86868b; }
+  .paste-area textarea {
+    width: 100%; min-height: 60px; border: none; background: transparent;
+    font-size: 13px; font-family: monospace; resize: vertical; outline: none; text-align: left;
+  }
+
+  .parsed-preview { margin-top: 16px; }
+  .parsed-preview.hidden { display: none; }
+  .parsed-name { font-size: 18px; font-weight: 700; color: #0071e3; margin-bottom: 4px; }
+  .parsed-date { font-size: 13px; color: #86868b; margin-bottom: 12px; }
+  .parsed-scores { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+  .parsed-score-item {
+    background: #f5f5f7; border-radius: 8px; padding: 8px 6px; text-align: center;
+    font-size: 11px; color: #515154; line-height: 1.3;
+  }
+  .parsed-score-item .score-val { font-size: 20px; font-weight: 700; color: #1d1d1f; display: block; margin-top: 2px; }
+  .parsed-score-item .score-val.high { color: #34c759; }
+  .parsed-score-item .score-val.mid { color: #ff9500; }
+  .parsed-score-item .score-val.low { color: #ff3b30; }
+
+  .parse-success { background: #f0fff4; border: 1px solid #34c759; border-radius: 10px; padding: 12px 16px; font-size: 14px; color: #1d1d1f; margin-top: 12px; }
+  .parse-error { background: #fff2f2; border: 1px solid #ff3b30; border-radius: 10px; padding: 12px 16px; font-size: 14px; color: #ff3b30; margin-top: 12px; }
+
+  /* Director paste area styling */
+  .paste-area-director { border-color: #ff9500; }
+  .paste-area-director:hover { border-color: #e08600; background: #fff9f0; }
+  .parsed-name.director { color: #ff9500; }
+
+  @media (max-width: 600px) {
+    .parsed-scores { grid-template-columns: repeat(3, 1fr); }
+    .container { padding: 16px 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div class="internal-badge">🔒 社内限定ツール</div>
+    <h1>性格診断レポート生成</h1>
+    <p>Googleスプシからコピペ → ワンクリックでNotionに貼れるレポートを生成</p>
+  </header>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" data-tab="clinic" onclick="switchTab('clinic')">① 医院</button>
+    <button class="tab" data-tab="director" onclick="switchTab('director')">② 院長診断</button>
+    <button class="tab" data-tab="candidate" onclick="switchTab('candidate')">③ 候補者</button>
+    <button class="tab" data-tab="generate" onclick="switchTab('generate')">④ 生成</button>
+  </div>
+
+  <!-- Section 1: Clinic -->
+  <div class="section active" id="section-clinic">
+    <div class="template-bar">
+      <select id="clinicTemplate" onchange="loadClinicTemplate()">
+        <option value="">-- 保存済み医院を選択 --</option>
+      </select>
+      <button class="btn-template-save" onclick="saveClinicTemplate()">医院を保存</button>
+      <button class="btn-template-delete" onclick="deleteClinicTemplate()">削除</button>
+    </div>
+
+    <div class="card">
+      <h2><span class="icon">🏥</span>歯科医院情報</h2>
+      <div class="form-group">
+        <label>医院名</label>
+        <input type="text" id="clinicName" placeholder="例：〇〇歯科クリニック">
+      </div>
+      <div class="form-group">
+        <label>院長名</label>
+        <input type="text" id="doctorName" placeholder="例：田中太郎">
+      </div>
+      <div class="form-group">
+        <label>診療内容・得意分野</label>
+        <textarea id="clinicSpecialty" placeholder="例：一般歯科、矯正、インプラント、小児歯科"></textarea>
+      </div>
+      <div class="form-group">
+        <label>医院の雰囲気・文化</label>
+        <textarea id="clinicCulture" placeholder="例：チームワーク重視、患者さんとの丁寧なコミュニケーションを大切にしている"></textarea>
+      </div>
+      <div class="form-group">
+        <label>求める人物像</label>
+        <textarea id="idealCandidate" placeholder="例：協調性があり、向上心を持って自ら学べる方"></textarea>
+      </div>
+      <div class="form-group">
+        <label>職場環境の特徴</label>
+        <textarea id="workEnvironment" placeholder="例：スタッフ10名、アットホームな雰囲気、研修制度充実"></textarea>
+      </div>
+      <div class="form-group">
+        <label>院長のマネジメントスタイル</label>
+        <textarea id="managementStyle" placeholder="例：細かく指導するタイプ、自主性を重んじる、定期的な面談あり"></textarea>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="switchTab('director')">次へ：院長診断 →</button>
+  </div>
+
+  <!-- Section 2: Director Assessment -->
+  <div class="section" id="section-director">
+    <div class="card">
+      <h2><span class="icon">👨‍⚕️</span>院長の性格診断データ</h2>
+      <p style="font-size:13px; color:#86868b; margin-bottom:16px;">
+        院長の性格診断スプシデータを貼り付けてください（ヘッダー行ごとOK）<br>
+        ※ 候補者との相性分析に使用します。任意項目です。
+      </p>
+
+      <div class="paste-area paste-area-director" onclick="document.getElementById('directorPasteInput').focus()">
+        <div id="directorPastePrompt">
+          <div class="paste-icon">👨‍⚕️</div>
+          <div class="paste-label">院長のスプシデータを貼り付け</div>
+          <div class="paste-hint">設問数は何問でもOK（自動検出します）</div>
+        </div>
+        <textarea id="directorPasteInput" placeholder="院長のスプシデータをここに貼り付け..."></textarea>
+      </div>
+
+      <div id="directorParseMessage"></div>
+
+      <div class="parsed-preview hidden" id="directorParsedPreview">
+        <div class="parsed-name director" id="directorParsedName"></div>
+        <div class="parsed-date" id="directorParsedDate"></div>
+        <div class="parsed-scores" id="directorParsedScores"></div>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:8px;">
+      <button class="btn-secondary" onclick="switchTab('clinic')" style="border-color:#d2d2d7; color:#515154;">← 戻る</button>
+      <button class="btn-primary" onclick="switchTab('candidate')">次へ：候補者 →</button>
+    </div>
+  </div>
+
+  <!-- Section 3: Candidate -->
+  <div class="section" id="section-candidate">
+    <div class="card">
+      <h2><span class="icon">📋</span>候補者の性格診断データ</h2>
+      <p style="font-size:13px; color:#86868b; margin-bottom:16px;">
+        スプレッドシートでヘッダー行＋データ行をまとめて選択 → コピー → 貼り付け<br>
+        設問数は何問でもOK（自動検出します）
+      </p>
+
+      <div class="paste-area" onclick="document.getElementById('pasteInput').focus()">
+        <div>
+          <div class="paste-icon">📎</div>
+          <div class="paste-label">候補者のスプシデータを貼り付け</div>
+          <div class="paste-hint">ヘッダー行ごとコピペしてOK</div>
+        </div>
+        <textarea id="pasteInput" placeholder="候補者のスプシデータをここに貼り付け..."></textarea>
+      </div>
+
+      <div id="parseMessage"></div>
+
+      <div class="parsed-preview hidden" id="parsedPreview">
+        <div class="parsed-name" id="parsedName"></div>
+        <div class="parsed-date" id="parsedDate"></div>
+        <div class="parsed-scores" id="parsedScores"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="icon">👤</span>候補者追加情報</h2>
+      <div class="form-group">
+        <label>職種</label>
+        <select id="candidateRole">
+          <option value="">選択してください</option>
+          <option value="歯科衛生士">歯科衛生士</option>
+          <option value="歯科助手">歯科助手</option>
+          <option value="歯科医師">歯科医師</option>
+          <option value="歯科技工士">歯科技工士</option>
+          <option value="受付">受付</option>
+          <option value="その他">その他</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>電話ヒアリングメモ（任意）</label>
+        <textarea id="hearingMemo" placeholder="電話で聞いた追加情報があれば入力&#10;例：前職は3年勤務、人間関係が退職理由。明るい印象。"></textarea>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:8px;">
+      <button class="btn-secondary" onclick="switchTab('director')" style="border-color:#d2d2d7; color:#515154;">← 戻る</button>
+      <button class="btn-primary" onclick="switchTab('generate')">次へ：レポート生成 →</button>
+    </div>
+  </div>
+
+  <!-- Section 4: Generate -->
+  <div class="section" id="section-generate">
+    <div class="card" id="summaryCard">
+      <h2><span class="icon">✅</span>入力内容の確認</h2>
+      <div id="summaryContent" style="font-size:14px;"></div>
+    </div>
+
+    <button class="btn-primary" id="generateBtn" onclick="generateReport()">
+      レポートを生成する
+    </button>
+
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <p>レポートを生成中...</p>
+      <p style="font-size:12px; color:#86868b; margin-top:8px;">通常30秒〜1分程度かかります</p>
+    </div>
+
+    <div class="error-msg" id="errorMsg"></div>
+
+    <div class="result-area" id="resultArea">
+      <div class="result-header">
+        <button class="btn-copy" id="copyBtn" onclick="copyResult()">Notionにコピー</button>
+        <button class="btn-reset" onclick="resetResult()">新規作成</button>
+      </div>
+      <div class="result-content" id="resultContent"></div>
+      <div style="margin-top:12px; font-size:12px; color:#86868b; text-align:center;">
+        このテキストをNotionにそのまま貼り付けできます
+      </div>
+    </div>
+
+    <div style="display:flex; gap:8px; margin-top:12px;">
+      <button class="btn-secondary" onclick="switchTab('candidate')" style="border-color:#d2d2d7; color:#515154;">← 戻る</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== API Key (GitHubリポジトリで管理 - キーを更新する際はこの1行を書き換える) =====
+const CLAUDE_API_KEY = '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';
+
+// ===== GitHub設定 (医院テンプレートをリポジトリのclinics.jsonで管理) =====
+const GITHUB_TOKEN = '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'; // GitHub Personal Access Token
+const GITHUB_OWNER = 'naototakeda-cmd'; // GitHubユーザー名（例: pitatto-saiyo）
+const GITHUB_REPO  = 'syanai_seikaku-shindan-tool';    // リポジトリ名
+const GITHUB_FILE  = 'clinics.json';
+const GITHUB_API   = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`;
+
+// 医院データのメモリキャッシュ（SHAはファイル更新時に必須）
+let clinicsData = {};
+let clinicsFileSha = null;
+
+// ===== Parsed data storage =====
+let parsedCandidate = null;
+let parsedDirector = null;
+
+// ===== Initialize =====
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadClinicTemplates();
+  setupPasteAreas();
+});
+
+// ===== Generic Spreadsheet Parser =====
+// Parses any spreadsheet paste: detects header row, extracts name + scores (any number of questions)
+function parseSpreadsheet(raw) {
+  if (!raw.trim()) return null;
+
+  const lines = raw.trim().split('\n');
+
+  // Separate header line and data line
+  let headerLine = null;
+  let dataLine = null;
+
+  for (const line of lines) {
+    const cells = line.split('\t');
+    if (cells.length < 3) continue;
+
+    // Header row: contains text like "タイムスタンプ", "お名前", or numbered questions
+    const isHeader = cells.some(c =>
+      /タイムスタンプ|お名前|名前/.test(c) ||
+      /^\d+\./.test(c.trim())
+    );
+
+    if (isHeader) {
+      headerLine = line;
+    } else if (/\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2}/.test(cells[0])) {
+      // Data row: starts with timestamp
+      dataLine = line;
+    } else if (!dataLine && !isHeader) {
+      // Fallback: treat as data if it has numbers
+      const numCount = cells.filter(c => /^\d+$/.test(c.trim())).length;
+      if (numCount >= 5) dataLine = line;
+    }
+  }
+
+  if (!dataLine) return { error: 'データ行が見つかりませんでした。' };
+
+  // Parse header for question labels
+  let questionLabels = [];
+  if (headerLine) {
+    const headerCells = headerLine.split('\t');
+    // Skip timestamp and name columns, collect question labels
+    for (let i = 0; i < headerCells.length; i++) {
+      const cell = headerCells[i].trim();
+      // Match patterns like "1.xxxx" or "Q1: xxxx" or question text
+      if (/^\d+[\.\s]/.test(cell) || /^Q\d+/i.test(cell)) {
+        questionLabels.push(cell);
+      }
+    }
+  }
+
+  // Parse data row
+  const cells = dataLine.split('\t');
+  let timestamp = '';
+  let name = '';
+  let scores = [];
+
+  if (/\d{4}[\/\-]/.test(cells[0])) {
+    timestamp = cells[0].trim();
+    name = (cells[1] || '').trim();
+    scores = cells.slice(2).map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+  } else {
+    name = (cells[0] || '').trim();
+    scores = cells.slice(1).map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+  }
+
+  if (!name || scores.length < 3) {
+    return { error: `解析失敗（名前="${name}", スコア数=${scores.length}）` };
+  }
+
+  // Extract date
+  let diagDate = '';
+  if (timestamp) {
+    const match = timestamp.match(/(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
+    if (match) diagDate = `${match[1]}-${match[2].padStart(2,'0')}-${match[3].padStart(2,'0')}`;
+  }
+
+  return { timestamp, name, scores, diagDate, questionLabels };
+}
+
+// ===== Render score preview =====
+function renderScorePreview(data, nameEl, dateEl, scoresEl) {
+  nameEl.textContent = `${data.name} さん`;
+  dateEl.textContent = data.timestamp ? `回答日時: ${data.timestamp}` : '';
+
+  scoresEl.innerHTML = '';
+  data.scores.forEach((score, i) => {
+    const div = document.createElement('div');
+    div.className = 'parsed-score-item';
+    const colorClass = score >= 4 ? 'high' : score >= 3 ? 'mid' : 'low';
+    const label = `Q${i+1}`;
+    const tooltip = data.questionLabels[i] || `Q${i+1}`;
+    div.innerHTML = `${label}<span class="score-val ${colorClass}">${score}</span>`;
+    div.title = tooltip;
+    scoresEl.appendChild(div);
+  });
+}
+
+// ===== Paste Area Setup =====
+function setupPasteAreas() {
+  // Candidate paste
+  const candidateInput = document.getElementById('pasteInput');
+  const handleCandidate = () => {
+    const result = parseSpreadsheet(candidateInput.value);
+    const msgEl = document.getElementById('parseMessage');
+    const previewEl = document.getElementById('parsedPreview');
+
+    if (!candidateInput.value.trim()) {
+      msgEl.innerHTML = '';
+      previewEl.classList.add('hidden');
+      parsedCandidate = null;
+      return;
+    }
+    if (!result || result.error) {
+      msgEl.innerHTML = `<div class="parse-error">${result ? result.error : 'データが見つかりません'}</div>`;
+      previewEl.classList.add('hidden');
+      parsedCandidate = null;
+      return;
+    }
+
+    parsedCandidate = result;
+    msgEl.innerHTML = `<div class="parse-success">読み取り完了: <strong>${result.name}</strong> さん（${result.scores.length}問）</div>`;
+    previewEl.classList.remove('hidden');
+    renderScorePreview(result,
+      document.getElementById('parsedName'),
+      document.getElementById('parsedDate'),
+      document.getElementById('parsedScores')
+    );
+  };
+  candidateInput.addEventListener('input', handleCandidate);
+  candidateInput.addEventListener('paste', () => setTimeout(handleCandidate, 50));
+
+  // Director paste
+  const directorInput = document.getElementById('directorPasteInput');
+  const handleDirector = () => {
+    const result = parseSpreadsheet(directorInput.value);
+    const msgEl = document.getElementById('directorParseMessage');
+    const previewEl = document.getElementById('directorParsedPreview');
+
+    if (!directorInput.value.trim()) {
+      msgEl.innerHTML = '';
+      previewEl.classList.add('hidden');
+      parsedDirector = null;
+      return;
+    }
+    if (!result || result.error) {
+      msgEl.innerHTML = `<div class="parse-error">${result ? result.error : 'データが見つかりません'}</div>`;
+      previewEl.classList.add('hidden');
+      parsedDirector = null;
+      return;
+    }
+
+    parsedDirector = result;
+    msgEl.innerHTML = `<div class="parse-success">読み取り完了: <strong>${result.name}</strong> 院長（${result.scores.length}問）</div>`;
+    previewEl.classList.remove('hidden');
+    renderScorePreview(result,
+      document.getElementById('directorParsedName'),
+      document.getElementById('directorParsedDate'),
+      document.getElementById('directorParsedScores')
+    );
+  };
+  directorInput.addEventListener('input', handleDirector);
+  directorInput.addEventListener('paste', () => setTimeout(handleDirector, 50));
+}
+
+// ===== Tabs =====
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+  document.getElementById(`section-${tab}`).classList.add('active');
+  if (tab === 'generate') updateSummary();
+}
+
+// ===== Clinic Templates =====
+function getClinicData() {
+  return {
+    clinicName: document.getElementById('clinicName').value,
+    doctorName: document.getElementById('doctorName').value,
+    clinicSpecialty: document.getElementById('clinicSpecialty').value,
+    clinicCulture: document.getElementById('clinicCulture').value,
+    idealCandidate: document.getElementById('idealCandidate').value,
+    workEnvironment: document.getElementById('workEnvironment').value,
+    managementStyle: document.getElementById('managementStyle').value,
+  };
+}
+function setClinicData(data) {
+  document.getElementById('clinicName').value = data.clinicName || '';
+  document.getElementById('doctorName').value = data.doctorName || '';
+  document.getElementById('clinicSpecialty').value = data.clinicSpecialty || '';
+  document.getElementById('clinicCulture').value = data.clinicCulture || '';
+  document.getElementById('idealCandidate').value = data.idealCandidate || '';
+  document.getElementById('workEnvironment').value = data.workEnvironment || '';
+  document.getElementById('managementStyle').value = data.managementStyle || '';
+}
+// ===== GitHub API: clinics.json を取得 =====
+async function fetchClinicsFromGitHub() {
+  // GitHub設定が未完了の場合はスキップ（エラーを出さず空データで動作）
+  if (GITHUB_TOKEN === 'YOUR_GITHUB_PAT_HERE' || GITHUB_OWNER === 'YOUR_GITHUB_OWNER_HERE') {
+    clinicsData = {};
+    clinicsFileSha = null;
+    return;
+  }
+  try {
+    const res = await fetch(GITHUB_API, {
+      headers: {
+        'Authorization': `token ${GITHUB_TOKEN}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+    if (res.status === 404) {
+      clinicsData = {};
+      clinicsFileSha = null;
+      return;
+    }
+    if (!res.ok) throw new Error(`GitHub API error: ${res.status}`);
+    const json = await res.json();
+    clinicsFileSha = json.sha;
+    clinicsData = JSON.parse(decodeURIComponent(escape(atob(json.content.replace(/\n/g, '')))));
+  } catch (e) {
+    clinicsData = {};
+  }
+}
+
+// ===== GitHub API: clinics.json を更新 =====
+async function saveClinicsToGitHub() {
+  if (GITHUB_TOKEN === 'YOUR_GITHUB_PAT_HERE' || GITHUB_OWNER === 'YOUR_GITHUB_OWNER_HERE') {
+    throw new Error('GitHub設定が未完了です。HTMLファイル内の GITHUB_TOKEN と GITHUB_OWNER を設定してください。');
+  }
+  const content = btoa(unescape(encodeURIComponent(JSON.stringify(clinicsData, null, 2))));
+  const body = { message: '医院テンプレートを更新', content };
+  if (clinicsFileSha) body.sha = clinicsFileSha;
+
+  const res = await fetch(GITHUB_API, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `token ${GITHUB_TOKEN}`,
+      'Accept': 'application/vnd.github.v3+json`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || `GitHub API error: ${res.status}`);
+  }
+  const data = await res.json();
+  clinicsFileSha = data.content.sha;
+}
+
+// ===== 医院テンプレート: セレクトボックスを再描画 =====
+function renderClinicSelect() {
+  const select = document.getElementById('clinicTemplate');
+  const current = select.value;
+  select.innerHTML = '<option value="">-- 保存済み医院を選択 --</option>';
+  Object.keys(clinicsData).forEach(name => {
+    const opt = document.createElement('option');
+    opt.value = name; opt.textContent = name;
+    select.appendChild(opt);
+  });
+  if (current) select.value = current;
+}
+
+// ===== 医院テンプレート: 読み込み（起動時） =====
+async function loadClinicTemplates() {
+  const saveBtn = document.querySelector('.btn-template-save');
+  const delBtn  = document.querySelector('.btn-template-delete');
+  if (saveBtn) saveBtn.disabled = true;
+  if (delBtn)  delBtn.disabled  = true;
+  await fetchClinicsFromGitHub();
+  renderClinicSelect();
+  if (saveBtn) saveBtn.disabled = false;
+  if (delBtn)  delBtn.disabled  = false;
+}
+
+// ===== 医院テンプレート: 選択して読み込み =====
+function loadClinicTemplate() {
+  const name = document.getElementById('clinicTemplate').value;
+  if (!name) return;
+  if (clinicsData[name]) setClinicData(clinicsData[name]);
+}
+
+// ===== 医院テンプレート: 保存 =====
+async function saveClinicTemplate() {
+  const data = getClinicData();
+  if (!data.clinicName) { alert('医院名を入力してください'); return; }
+
+  const saveBtn = document.querySelector('.btn-template-save');
+  const origText = saveBtn ? saveBtn.textContent : '';
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = '保存中…'; }
+
+  clinicsData[data.clinicName] = data;
+  try {
+    await saveClinicsToGitHub();
+    renderClinicSelect();
+    document.getElementById('clinicTemplate').value = data.clinicName;
+    alert(`「${data.clinicName}」を保存しました`);
+  } catch (e) {
+    alert('保存に失敗しました: ' + e.message);
+    delete clinicsData[data.clinicName];
+  } finally {
+    if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = origText; }
+  }
+}
+
+// ===== 医院テンプレート: 削除 =====
+async function deleteClinicTemplate() {
+  const name = document.getElementById('clinicTemplate').value;
+  if (!name) { alert('削除する医院を選択してください'); return; }
+  if (!confirm(`「${name}」を削除しますか？`)) return;
+
+  const delBtn = document.querySelector('.btn-template-delete');
+  const origText = delBtn ? delBtn.textContent : '';
+  if (delBtn) { delBtn.disabled = true; delBtn.textContent = '削除中…'; }
+
+  const backup = clinicsData[name];
+  delete clinicsData[name];
+  try {
+    await saveClinicsToGitHub();
+    renderClinicSelect();
+  } catch (e) {
+    alert('削除に失敗しました: ' + e.message);
+    clinicsData[name] = backup;
+    renderClinicSelect();
+  } finally {
+    if (delBtn) { delBtn.disabled = false; delBtn.textContent = origText; }
+  }
+}
+
+// ===== Summary =====
+function updateSummary() {
+  const clinic = getClinicData();
+  const cName = parsedCandidate ? parsedCandidate.name : '未入力';
+  const role = document.getElementById('candidateRole').value || '未選択';
+  const cDate = parsedCandidate ? (parsedCandidate.diagDate || parsedCandidate.timestamp) : '未入力';
+  const cScores = parsedCandidate ? parsedCandidate.scores.length : 0;
+  const dName = parsedDirector ? parsedDirector.name : '未入力';
+  const dScores = parsedDirector ? parsedDirector.scores.length : 0;
+
+  document.getElementById('summaryContent').innerHTML = `
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+      <div><strong style="color:#86868b; font-size:12px;">医院</strong><br>${clinic.clinicName || '未入力'}</div>
+      <div><strong style="color:#86868b; font-size:12px;">候補者</strong><br>${cName}（${role}）- ${cScores}問</div>
+      <div><strong style="color:#86868b; font-size:12px;">院長診断</strong><br>${parsedDirector ? `${dName} - ${dScores}問` : 'なし（スキップ）'}</div>
+      <div><strong style="color:#86868b; font-size:12px;">実施日</strong><br>${cDate}</div>
+    </div>
+  `;
+}
+
+// ===== Build score text from parsed data =====
+function buildScoreText(data) {
+  let text = '';
+  data.scores.forEach((score, i) => {
+    const label = data.questionLabels[i] || `Q${i+1}`;
+    text += `${label}：${score}/5\n`;
+  });
+  return text;
+}
+
+// ===== Build Prompt =====
+function buildPrompt() {
+  const clinic = getClinicData();
+  const name = parsedCandidate.name;
+  const role = document.getElementById('candidateRole').value;
+  const date = parsedCandidate.diagDate || parsedCandidate.timestamp;
+  const hearingMemo = document.getElementById('hearingMemo').value;
+  const numQ = parsedCandidate.scores.length;
+
+  let candidateScoreText = buildScoreText(parsedCandidate);
+
+  let directorSection = '';
+  if (parsedDirector) {
+    directorSection = `
+
+---
+
+# 院長の性格診断データ
+
+氏名：${parsedDirector.name}
+診断実施日：${parsedDirector.diagDate || parsedDirector.timestamp || '不明'}
+
+【院長の性格診断スコア（${parsedDirector.scores.length}問）】
+${buildScoreText(parsedDirector)}
+
+※ 院長のスコアと候補者のスコアを比較し、性格の相性・補完関係を分析してください。`;
+  }
+
+  let candidateSection = `氏名：${name}
+職種：${role}
+診断実施日：${date}
+
+【性格診断スコア（${numQ}問）】
+${candidateScoreText}`;
+
+  if (hearingMemo) {
+    candidateSection += `\n【電話ヒアリングメモ】\n${hearingMemo}`;
+  }
+
+  return `# 指示
+
+あなたは優秀な採用コンサルタントです。
+
+以下の「歯科医院情報」「候補者データ」${parsedDirector ? '「院長の性格診断データ」' : ''}を元に、指定の「出力フォーマット」に従って性格診断レポートを作成してください。
+
+※ 設問の中に「一度もない」「全く〜ない」「ほとんどない」のような極端な表現を含む設問がある場合、それはライスケール（虚偽検出）項目です。これらのスコアが高い場合は「自分を良く見せようとしている傾向」として信頼性チェックに反映してください。
+${parsedDirector ? '※ 院長の性格診断データが提供されている場合、候補者との性格の相性・補完関係も分析してください。' : ''}
+
+---
+
+# 歯科医院情報
+
+【医院名】：${clinic.clinicName}
+【院長名】：${clinic.doctorName}
+【診療内容・得意分野】：${clinic.clinicSpecialty}
+【医院の雰囲気・文化】：${clinic.clinicCulture}
+【求める人物像】：${clinic.idealCandidate}
+【職場環境の特徴】：${clinic.workEnvironment}
+【院長のマネジメントスタイル】：${clinic.managementStyle}
+${directorSection}
+
+---
+
+# 候補者データ
+
+${candidateSection}
+
+---
+
+# 出力フォーマット（Markdown形式）
+
+以下の形式を厳守してください。Notionに貼り付けできるMarkdown形式で出力してください。
+設問の内容に応じて、適切なカテゴリに分類して分析してください。
+
+📄 性格診断レポート：${name} 様
+
+## 基本情報
+
+| 項目 | 内容 |
+|------|------|
+| 実施日 | ${date} |
+| 職種 | ${role} |
+
+## 1. 総評（採用推奨度）
+
+🏅 ランク：[S〜Cで判定] （[一言キャッチコピー]）
+
+**判定コメント:**
+
+[性格の全体像と、その職種への適性を3〜4行で記述。特に${clinic.clinicName}の「${clinic.clinicCulture}」に耐えうる資質があるか、プロ意識の観点から記述してください]
+
+## 2. 医院との相性スコア
+
+| 項目 | スコア (10段階) | 解説 |
+|------|--------------|------|
+| 🔧 技術・実務適性 | [点数] | [正確性・集中力・向上心からの判定] |
+| ⚖️ 組織・ルール遵守 | [点数] | [規律性・誠実さからの判定] |
+| 🤝 対人・接遇 | [点数] | [コミュニケーション・柔軟性からの判定] |
+| ⚓️ 定着・安定性 | [点数] | [離職リスクの低さ・持続力からの判定] |
+${parsedDirector ? `
+## 2.5 院長との性格相性
+
+| 観点 | 評価 | 解説 |
+|------|------|------|
+| コミュニケーションスタイル | [◎/○/△] | [院長と候補者のスタイル比較] |
+| 仕事の進め方 | [◎/○/△] | [正確性重視 vs スピード重視など] |
+| ストレス耐性のバランス | [◎/○/△] | [互いの弱点を補完できるか] |
+| 価値観の一致度 | [◎/○/△] | [仕事観・患者対応の姿勢] |
+
+**総合相性コメント:**
+
+[院長の性格と候補者の性格を比較し、相性の良い点と注意すべき点を3行程度で記述]
+` : ''}
+## 3. 離職リスク・定着可能性分析
+
+**定着見込み：**[高 / 中（条件付き）/ 低]
+
+[全体的な定着傾向を2行程度で要約]
+
+### 🚩 離職のトリガー（こうなると辞める）
+
+- **[トリガー名]**：[該当する設問の数値に基づいた解説]
+- **[トリガー名]**：[解説]
+
+### ⚓️ 長期定着のポイント（こうすれば辞めない）
+
+- **[対策1]**：[具体的な方法]
+- **[対策2]**：[フォロー体制]
+
+## 4. 性格の傾向（詳細分析）
+
+### ■ 強み・長所
+
+- **[強み見出し]**：[解説]
+- **[強み見出し]**：[解説]
+
+### ■ 注意点・懸念点
+
+- **[懸念点見出し]**：[解説]
+- **[懸念点見出し]**：[解説]
+
+### ■ 行動特性チャート
+
+| 特性 | 評価 | 解説 |
+|------|------|------|
+| 主体性 | [高/中/低] | [補足説明] |
+| 協調性 | [高/中/低] | [補足説明] |
+| 規律性 | [高/中/低] | [補足説明] |
+| 感情制御 | [高/中/低] | [補足説明] |
+
+## 5. 育成方針（マネジメントガイド）
+
+### 🌱 入職初期の指導ポイント
+
+- **教え方**：[${clinic.clinicName}の環境をどう伝えるか]
+- **接し方**：[声掛けの頻度や距離感]
+
+### 🌳 長期的な活躍のために
+
+- **キャリアパス**：[どのような専門性や役割を提示すべきか]
+
+## 6. 面談の際の質問（離職リスク・本音確認用）
+
+### Q1. [確認項目名] の確認
+
+❓ 「[具体的な質問文]」
+
+- **意図**: [何を見極めるか]
+- **回答例（理想）**: [期待する回答]
+- **NG回答**: [注意すべき回答]
+
+### Q2. [確認項目名] の確認
+
+❓ 「[具体的な質問文]」
+
+- **意図**: [何を見極めるか]
+- **回答例（理想）**: [期待する回答]
+- **NG回答**: [注意すべき回答]
+
+## ℹ️ データの信頼性チェック
+
+**虚偽回答（ライスケール）**: ✅ [判定結果]
+
+[極端な表現を含む設問のスコアを分析し、回答の信頼性を評価]
+
+## 📊 スコア別詳細分析
+
+[提供された設問を内容に基づいて適切なカテゴリ（対人・コミュニケーション / ホスピタリティ・協調性 / 実務遂行・正確性 / メンタルタフネス・安定性 / ライスケール 等）に分類し、それぞれの平均スコアと分析を記述してください]
+
+## 💡 採用後の「配置」アドバイス
+
+- **最適なポジション**：[具体的な業務内容]
+- **避けるべき環境**：[早期離職を招く恐れのある状況]`;
+}
+
+// ===== Generate Report =====
+async function generateReport() {
+  const apiKey = CLAUDE_API_KEY;
+  if (!apiKey || apiKey === 'YOUR_API_KEY_HERE') { showError('APIキーが設定されていません。HTMLファイル内の CLAUDE_API_KEY を更新してください。'); return; }
+  if (!document.getElementById('clinicName').value) { showError('医院名を入力してください。'); return; }
+  if (!parsedCandidate) { showError('候補者のスプレッドシートデータを貼り付けてください。'); return; }
+
+  const btn = document.getElementById('generateBtn');
+  const loading = document.getElementById('loading');
+  const resultArea = document.getElementById('resultArea');
+  const errorMsg = document.getElementById('errorMsg');
+
+  btn.disabled = true;
+  btn.style.display = 'none';
+  loading.classList.add('active');
+  resultArea.classList.remove('active');
+  errorMsg.classList.remove('active');
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 8000,
+        messages: [{ role: 'user', content: buildPrompt() }]
+      })
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      if (response.status === 401) throw new Error('APIキーが無効です。正しいキーを設定してください。');
+      if (response.status === 429) throw new Error('APIのレート制限に達しました。少し待ってから再試行してください。');
+      throw new Error(err.error?.message || `API Error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const reportText = data.content[0].text;
+
+    window.reportMarkdown = reportText;
+    window.reportHtml = markdownToHtml(reportText);
+    document.getElementById('resultContent').innerHTML = window.reportHtml;
+    resultArea.classList.add('active');
+
+  } catch (error) {
+    showError(error.message);
+  } finally {
+    loading.classList.remove('active');
+    btn.disabled = false;
+    btn.style.display = 'block';
+  }
+}
+
+function showError(msg) {
+  const el = document.getElementById('errorMsg');
+  el.textContent = msg;
+  el.classList.add('active');
+}
+
+// ===== Markdown to HTML converter =====
+function markdownToHtml(md) {
+  let html = md;
+  html = html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+  html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+  html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/^(\|.+\|)\n\|[-| :]+\|\n((?:\|.+\|\n?)*)/gm, (match, headerRow, bodyRows) => {
+    const headers = headerRow.split('|').filter(c => c.trim()).map(c => `<th>${c.trim()}</th>`).join('');
+    const rows = bodyRows.trim().split('\n').map(row => {
+      const cells = row.split('|').filter(c => c.trim()).map(c => `<td>${c.trim()}</td>`).join('');
+      return `<tr>${cells}</tr>`;
+    }).join('');
+    return `<table><thead><tr>${headers}</tr></thead><tbody>${rows}</tbody></table>\n`;
+  });
+  html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
+  html = html.replace(/((?:<li>.*<\/li>\n?)+)/g, '<ul>$1</ul>');
+  html = html.replace(/^---$/gm, '<hr>');
+  html = html.replace(/^(?!<[hultdao]|<\/|<hr|<str)(.+)$/gm, '<p>$1</p>');
+  html = html.replace(/<p>\s*<\/p>/g, '');
+  return html;
+}
+
+// ===== Copy as rich text for Notion =====
+async function copyResult() {
+  if (!window.reportHtml) return;
+  try {
+    const blob = new Blob([window.reportHtml], { type: 'text/html' });
+    const textBlob = new Blob([window.reportMarkdown], { type: 'text/plain' });
+    await navigator.clipboard.write([
+      new ClipboardItem({ 'text/html': blob, 'text/plain': textBlob })
+    ]);
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = 'コピーしました！';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Notionにコピー'; btn.classList.remove('copied'); }, 2000);
+  } catch (e) {
+    try { await navigator.clipboard.writeText(window.reportMarkdown); } catch {
+      const ta = document.createElement('textarea');
+      ta.value = window.reportMarkdown;
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    }
+    document.getElementById('copyBtn').textContent = 'コピーしました！';
+  }
+}
+
+function resetResult() {
+  if (!confirm('新しいレポートを作成しますか？候補者情報がリセットされます。')) return;
+  document.getElementById('pasteInput').value = '';
+  document.getElementById('parseMessage').innerHTML = '';
+  document.getElementById('parsedPreview').classList.add('hidden');
+  document.getElementById('candidateRole').value = '';
+  document.getElementById('hearingMemo').value = '';
+  document.getElementById('resultArea').classList.remove('active');
+  parsedCandidate = null;
+  window.reportMarkdown = null;
+  window.reportHtml = null;
+  switchTab('candidate');
+}
+</script>
+</body>
+</html>
