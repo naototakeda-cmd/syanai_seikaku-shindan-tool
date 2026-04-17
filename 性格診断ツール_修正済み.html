@@ -44,7 +44,6 @@
   .form-group textarea { min-height: 80px; resize: vertical; }
   .form-group .hint { font-size: 12px; color: #86868b; margin-top: 4px; }
 
-
   .btn-primary { width: 100%; padding: 16px; border: none; border-radius: 14px; font-size: 17px; font-weight: 700; cursor: pointer; background: #0071e3; color: #fff; transition: all 0.2s; margin-top: 8px; }
   .btn-primary:hover { background: #0077ed; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,113,227,0.3); }
   .btn-primary:active { transform: translateY(0); }
@@ -56,6 +55,8 @@
   .loading.active { display: block; }
   .spinner { width: 40px; height: 40px; border: 3px solid #e8e8ed; border-top-color: #0071e3; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
   @keyframes spin { to { transform: rotate(360deg); } }
+  .loading .step { font-size: 12px; color: #86868b; margin-top: 4px; }
+  .loading .step.current { color: #0071e3; font-weight: 600; }
 
   .result-area { display: none; }
   .result-area.active { display: block; }
@@ -80,6 +81,7 @@
   .result-content ul { margin: 8px 0; padding-left: 20px; }
   .result-content li { margin: 4px 0; }
   .result-content hr { border: none; border-top: 1px solid #e8e8ed; margin: 16px 0; }
+  .result-content blockquote { border-left: 4px solid #ff9500; background: #fff8e8; padding: 10px 14px; margin: 12px 0; border-radius: 4px; }
 
   .error-msg { background: #fff2f2; border: 1px solid #ff3b30; border-radius: 12px; padding: 16px; color: #ff3b30; font-size: 14px; margin-top: 12px; display: none; }
   .error-msg.active { display: block; }
@@ -119,9 +121,28 @@
   .parsed-score-item .score-val.high { color: #34c759; }
   .parsed-score-item .score-val.mid { color: #ff9500; }
   .parsed-score-item .score-val.low { color: #ff3b30; }
+  .parsed-score-item.lie-scale { border: 2px solid #ff9500; background: #fff8e8; }
 
   .parse-success { background: #f0fff4; border: 1px solid #34c759; border-radius: 10px; padding: 12px 16px; font-size: 14px; color: #1d1d1f; margin-top: 12px; }
   .parse-error { background: #fff2f2; border: 1px solid #ff3b30; border-radius: 10px; padding: 12px 16px; font-size: 14px; color: #ff3b30; margin-top: 12px; }
+
+  /* Reliability Badge */
+  .reliability-badge-container { margin-top: 10px; }
+  .reliability-badge {
+    display: inline-block; padding: 4px 12px; border-radius: 12px;
+    font-size: 12px; font-weight: 700; color: #fff; margin-right: 6px;
+  }
+  .reliability-badge.high { background: #34c759; }
+  .reliability-badge.medium { background: #ff9500; }
+  .reliability-badge.low { background: #ff3b30; }
+  .reliability-badge.unknown { background: #86868b; }
+  .reliability-detail {
+    margin-top: 8px; padding: 10px 12px; background: #fafafa; border-radius: 8px;
+    font-size: 12px; line-height: 1.6; color: #515154;
+  }
+  .reliability-detail .flag-item {
+    padding: 4px 0; border-left: 3px solid #ff9500; padding-left: 8px; margin: 4px 0;
+  }
 
   /* Director paste area styling */
   .paste-area-director { border-color: #ff9500; }
@@ -164,46 +185,46 @@
       <h2><span class="icon">🏥</span>歯科医院情報</h2>
       <div class="form-group">
         <label>医院名</label>
-        <input type="text" id="clinicName" placeholder="例：〇〇歯科クリニック">
+        <input type="text" id="clinicName" placeholder="例:〇〇歯科クリニック">
       </div>
       <div class="form-group">
         <label>院長名</label>
-        <input type="text" id="doctorName" placeholder="例：田中太郎">
+        <input type="text" id="doctorName" placeholder="例:田中太郎">
       </div>
       <div class="form-group">
         <label>診療内容・得意分野</label>
-        <textarea id="clinicSpecialty" placeholder="例：一般歯科、矯正、インプラント、小児歯科"></textarea>
+        <textarea id="clinicSpecialty" placeholder="例:一般歯科、矯正、インプラント、小児歯科"></textarea>
       </div>
       <div class="form-group">
         <label>医院の雰囲気・文化</label>
-        <textarea id="clinicCulture" placeholder="例：チームワーク重視、患者さんとの丁寧なコミュニケーションを大切にしている"></textarea>
+        <textarea id="clinicCulture" placeholder="例:チームワーク重視、患者さんとの丁寧なコミュニケーションを大切にしている"></textarea>
       </div>
       <div class="form-group">
         <label>求める人物像</label>
-        <textarea id="idealCandidate" placeholder="例：協調性があり、向上心を持って自ら学べる方"></textarea>
+        <textarea id="idealCandidate" placeholder="例:協調性があり、向上心を持って自ら学べる方"></textarea>
       </div>
       <div class="form-group">
         <label>職場環境の特徴</label>
-        <textarea id="workEnvironment" placeholder="例：スタッフ10名、アットホームな雰囲気、研修制度充実"></textarea>
+        <textarea id="workEnvironment" placeholder="例:スタッフ10名、アットホームな雰囲気、研修制度充実"></textarea>
       </div>
       <div class="form-group">
         <label>院長のマネジメントスタイル</label>
-        <textarea id="managementStyle" placeholder="例：細かく指導するタイプ、自主性を重んじる、定期的な面談あり"></textarea>
+        <textarea id="managementStyle" placeholder="例:細かく指導するタイプ、自主性を重んじる、定期的な面談あり"></textarea>
       </div>
     </div>
-    <!-- 院長の性格診断データ（任意・医院ごとに保存） -->
+
     <details class="director-section" id="directorSection">
-      <summary>👨‍⚕️ 院長の性格診断データ（任意）</summary>
+      <summary>👨‍⚕️ 院長の性格診断データ(任意)</summary>
       <div class="inner">
         <p style="font-size:13px; color:#86868b; margin-bottom:12px;">
-          院長の性格診断スプシデータを貼り付けてください（ヘッダー行ごとOK）<br>
+          院長の性格診断スプシデータを貼り付けてください(ヘッダー行ごとOK)<br>
           ※ 候補者との相性分析に使用します。医院を保存すると一緒に保存されます。
         </p>
         <div class="paste-area paste-area-director" onclick="document.getElementById('directorPasteInput').focus()">
           <div id="directorPastePrompt">
             <div class="paste-icon">👨‍⚕️</div>
             <div class="paste-label">院長のスプシデータを貼り付け</div>
-            <div class="paste-hint">設問数は何問でもOK（自動検出します）</div>
+            <div class="paste-hint">設問数は何問でもOK(自動検出します)</div>
           </div>
           <textarea id="directorPasteInput" placeholder="院長のスプシデータをここに貼り付け..."></textarea>
         </div>
@@ -216,7 +237,7 @@
       </div>
     </details>
 
-    <button class="btn-primary" onclick="switchTab('candidate')">次へ：候補者 →</button>
+    <button class="btn-primary" onclick="switchTab('candidate')">次へ:候補者 →</button>
   </div>
 
   <!-- Section 2: Candidate -->
@@ -224,8 +245,8 @@
     <div class="card">
       <h2><span class="icon">📋</span>候補者の性格診断データ</h2>
       <p style="font-size:13px; color:#86868b; margin-bottom:16px;">
-        スプレッドシートでヘッダー行＋データ行をまとめて選択 → コピー → 貼り付け<br>
-        設問数は何問でもOK（自動検出します）
+        スプレッドシートでヘッダー行+データ行をまとめて選択 → コピー → 貼り付け<br>
+        設問数は何問でもOK(自動検出します)
       </p>
 
       <div class="paste-area" onclick="document.getElementById('pasteInput').focus()">
@@ -242,7 +263,8 @@
       <div class="parsed-preview hidden" id="parsedPreview">
         <div class="parsed-name" id="parsedName"></div>
         <div class="parsed-date" id="parsedDate"></div>
-        <div class="parsed-scores" id="parsedScores"></div>
+        <div class="reliability-badge-container" id="reliabilityBadgeContainer"></div>
+        <div class="parsed-scores" id="parsedScores" style="margin-top:12px;"></div>
       </div>
     </div>
 
@@ -261,18 +283,18 @@
         </select>
       </div>
       <div class="form-group">
-        <label>電話ヒアリングメモ（任意）</label>
-        <textarea id="hearingMemo" placeholder="電話で聞いた追加情報があれば入力&#10;例：前職は3年勤務、人間関係が退職理由。明るい印象。"></textarea>
+        <label>電話ヒアリングメモ(任意)</label>
+        <textarea id="hearingMemo" placeholder="電話で聞いた追加情報があれば入力&#10;例:前職は3年勤務、人間関係が退職理由。明るい印象。"></textarea>
       </div>
     </div>
 
     <div style="display:flex; gap:8px;">
       <button class="btn-secondary" onclick="switchTab('clinic')" style="border-color:#d2d2d7; color:#515154;">← 戻る</button>
-      <button class="btn-primary" onclick="switchTab('generate')">次へ：レポート生成 →</button>
+      <button class="btn-primary" onclick="switchTab('generate')">次へ:レポート生成 →</button>
     </div>
   </div>
 
-  <!-- Section 4: Generate -->
+  <!-- Section 3: Generate -->
   <div class="section" id="section-generate">
     <div class="card" id="summaryCard">
       <h2><span class="icon">✅</span>入力内容の確認</h2>
@@ -285,8 +307,11 @@
 
     <div class="loading" id="loading">
       <div class="spinner"></div>
-      <p>レポートを生成中...</p>
-      <p style="font-size:12px; color:#86868b; margin-top:8px;">通常30秒〜1分程度かかります</p>
+      <p id="loadingMain">レポートを生成中...</p>
+      <p class="step" id="loadingStep1">① 設問を自動分類中...</p>
+      <p class="step" id="loadingStep2">② 信頼性を判定中...</p>
+      <p class="step" id="loadingStep3">③ レポートを生成中...</p>
+      <p style="font-size:12px; color:#86868b; margin-top:8px;">通常30秒〜1分30秒程度かかります</p>
     </div>
 
     <div class="error-msg" id="errorMsg"></div>
@@ -309,16 +334,16 @@
 </div>
 
 <script>
-// ===== Cloudflare Worker URL (デプロイ後にここを書き換える) =====
-const WORKER_URL = 'https://syanai-seikaku-shindan.naoto-takeda.workers.dev'; // 例: https://seikaku-shindan.naototakeda-cmd.workers.dev
+// ===== Cloudflare Worker URL =====
+const WORKER_URL = 'https://syanai-seikaku-shindan.naoto-takeda.workers.dev';
 
-// 医院データのメモリキャッシュ（SHAはファイル更新時に必須）
+// ===== State =====
 let clinicsData = {};
 let clinicsFileSha = null;
-
-// ===== Parsed data storage =====
 let parsedCandidate = null;
 let parsedDirector = null;
+let candidateClassification = null; // AI分類結果のキャッシュ
+let candidateReliability = null;    // 信頼性判定結果のキャッシュ
 
 // ===== Initialize =====
 document.addEventListener('DOMContentLoaded', async () => {
@@ -326,14 +351,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupPasteAreas();
 });
 
-// ===== Generic Spreadsheet Parser =====
-// Parses any spreadsheet paste: detects header row, extracts name + scores (any number of questions)
+// ============================================================
+// Spreadsheet Parser
+// ============================================================
 function parseSpreadsheet(raw) {
   if (!raw.trim()) return null;
-
   const lines = raw.trim().split('\n');
 
-  // Separate header line and data line
   let headerLine = null;
   let dataLine = null;
 
@@ -341,7 +365,6 @@ function parseSpreadsheet(raw) {
     const cells = line.split('\t');
     if (cells.length < 3) continue;
 
-    // Header row: contains text like "タイムスタンプ", "お名前", or numbered questions
     const isHeader = cells.some(c =>
       /タイムスタンプ|お名前|名前/.test(c) ||
       /^\d+\./.test(c.trim())
@@ -350,10 +373,8 @@ function parseSpreadsheet(raw) {
     if (isHeader) {
       headerLine = line;
     } else if (/\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2}/.test(cells[0])) {
-      // Data row: starts with timestamp
       dataLine = line;
     } else if (!dataLine && !isHeader) {
-      // Fallback: treat as data if it has numbers
       const numCount = cells.filter(c => /^\d+$/.test(c.trim())).length;
       if (numCount >= 5) dataLine = line;
     }
@@ -361,21 +382,17 @@ function parseSpreadsheet(raw) {
 
   if (!dataLine) return { error: 'データ行が見つかりませんでした。' };
 
-  // Parse header for question labels
   let questionLabels = [];
   if (headerLine) {
     const headerCells = headerLine.split('\t');
-    // Skip timestamp and name columns, collect question labels
     for (let i = 0; i < headerCells.length; i++) {
       const cell = headerCells[i].trim();
-      // Match patterns like "1.xxxx" or "Q1: xxxx" or question text
       if (/^\d+[\.\s]/.test(cell) || /^Q\d+/i.test(cell)) {
         questionLabels.push(cell);
       }
     }
   }
 
-  // Parse data row
   const cells = dataLine.split('\t');
   let timestamp = '';
   let name = '';
@@ -391,10 +408,9 @@ function parseSpreadsheet(raw) {
   }
 
   if (!name || scores.length < 3) {
-    return { error: `解析失敗（名前="${name}", スコア数=${scores.length}）` };
+    return { error: `解析失敗(名前="${name}", スコア数=${scores.length})` };
   }
 
-  // Extract date
   let diagDate = '';
   if (timestamp) {
     const match = timestamp.match(/(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
@@ -404,15 +420,344 @@ function parseSpreadsheet(raw) {
   return { timestamp, name, scores, diagDate, questionLabels };
 }
 
-// ===== Render score preview =====
-function renderScorePreview(data, nameEl, dateEl, scoresEl) {
+// ============================================================
+// Heuristic Classification (AI分類前の仮判定・フォールバック)
+// ============================================================
+const LIE_SCALE_KEYWORDS = ['一度もない', '全く', '全然', 'まったく', 'ほとんどない'];
+
+function heuristicClassify(label) {
+  if (!label) return { category: 'uncategorized', isLieScale: false, isSociallyRisky: false };
+
+  const hasLieKeyword = LIE_SCALE_KEYWORDS.some(kw => label.includes(kw));
+  if (hasLieKeyword) {
+    return { category: 'lie_scale', isLieScale: true, isSociallyRisky: true };
+  }
+
+  if (/打ち解け|会話|話す|初対面|声をかけ|相手の立場|苦手な相手|悪口/.test(label)) {
+    return { category: 'interpersonal', isLieScale: false, isSociallyRisky: false };
+  }
+  if (/落ち着いて|集中力|ストレス|切り替え|安定|変化/.test(label)) {
+    return { category: 'stress_tolerance', isLieScale: false, isSociallyRisky: false };
+  }
+  if (/チーム|助ける|困っている|雰囲気|やり方を変える|目標/.test(label)) {
+    return { category: 'cooperation', isLieScale: false, isSociallyRisky: false };
+  }
+  if (/細かい|正確|スピード|挑戦|成長|ルール|マニュアル|感謝/.test(label)) {
+    return { category: 'work_aptitude', isLieScale: false, isSociallyRisky: false };
+  }
+  if (/長く|同じ職場|遅刻|欠勤/.test(label)) {
+    return { category: 'retention', isLieScale: false, isSociallyRisky: false };
+  }
+  return { category: 'uncategorized', isLieScale: false, isSociallyRisky: false };
+}
+
+// ============================================================
+// AI Classification via LLM
+// ============================================================
+async function classifyQuestionsWithAI(questionLabels) {
+  const prompt = `以下の性格診断設問を分類してください。各設問について、必ず指定のJSON形式で返してください。
+
+【分類カテゴリ】
+- interpersonal: 対人・コミュニケーション
+- stress_tolerance: ストレス耐性・安定性
+- cooperation: 協調性・チームワーク
+- work_aptitude: 業務適性(正確性・成長意欲)
+- retention: 定着・勤怠
+- lie_scale: ライスケール(虚偽検出項目)
+
+【ライスケール判定基準(最重要)】
+以下のいずれかに該当する設問は lie_scale に分類し is_lie_scale: true にする。
+- 「一度もない」「全く〜ない」「全然〜ない」「ほとんどない」などの極端な否定表現を含む
+- 「どんなに〜でも全く」など極端な肯定表現を含む
+- 現実的にあり得ない / 誰もが建前で "そう" と答えたくなる内容
+- 例:「誰かに強く怒ったことは一度もない」「どんなに忙しくても全くストレスを感じない」「人生で失敗したことがほとんどない」「相手の言い方がきつくても全く気にならない」
+
+【社会的リスク設問判定基準】
+正直に「低スコア」を選ぶと採用評価が下がりそうな設問は is_socially_risky: true にする。
+例:「初対面の人と話すのは苦にならない」「苦手な相手とも業務上は問題なく接する」
+
+【出力形式】
+必ず以下のJSON配列のみを返す。前後の説明文は一切不要。
+[
+  {"index": 1, "label": "設問文", "category": "カテゴリ", "is_lie_scale": true/false, "is_socially_risky": true/false},
+  ...
+]
+
+【分類対象の設問】
+${questionLabels.map((l, i) => `${i+1}. ${l}`).join('\n')}`;
+
+  const response = await fetch(`${WORKER_URL}/api/generate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 4000,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+
+  if (!response.ok) throw new Error(`分類API Error: ${response.status}`);
+  const data = await response.json();
+  const text = data.content[0].text;
+
+  // JSON抽出
+  const cleaned = text.replace(/```json|```/g, '').trim();
+  const jsonMatch = cleaned.match(/\[[\s\S]*\]/);
+  if (!jsonMatch) throw new Error('分類結果のJSON抽出に失敗');
+
+  return JSON.parse(jsonMatch[0]);
+}
+
+// ============================================================
+// Reliability Calculation (4層検知)
+// ============================================================
+function calculateReliability(data, classification) {
+  // 分類データを設問インデックスでマップ化
+  const classMap = {};
+  if (classification) {
+    classification.forEach(c => { classMap[c.index - 1] = c; });
+  }
+
+  // ライスケール項目を抽出
+  const lieScoreItems = [];
+  data.scores.forEach((score, i) => {
+    const cls = classMap[i];
+    if (cls && cls.is_lie_scale) {
+      lieScoreItems.push({
+        index: i + 1,
+        label: cls.label || data.questionLabels[i] || `Q${i+1}`,
+        score
+      });
+    } else if (!cls) {
+      // フォールバック: キーワードで判定
+      const label = data.questionLabels[i] || '';
+      const h = heuristicClassify(label);
+      if (h.isLieScale) {
+        lieScoreItems.push({ index: i + 1, label, score });
+      }
+    }
+  });
+
+  // ========== シグナル1: ライスケール極端回答 ==========
+  const sig1 = { flag: false, severity: 'none', message: '', score: 0 };
+  if (lieScoreItems.length > 0) {
+    const lieScores = lieScoreItems.map(x => x.score);
+    const fiveCount = lieScores.filter(s => s === 5).length;
+    const avg = lieScores.reduce((a, b) => a + b, 0) / lieScores.length;
+
+    if (fiveCount >= 2 || avg >= 4.5) {
+      sig1.flag = true;
+      sig1.severity = 'high';
+      sig1.score = 3;
+      sig1.message = `ライスケール${lieScoreItems.length}項目中、5点が${fiveCount}個、平均${avg.toFixed(1)}。社会的望ましさバイアスが強い`;
+    } else if (fiveCount >= 1 || avg >= 3.8) {
+      sig1.flag = true;
+      sig1.severity = 'medium';
+      sig1.score = 2;
+      sig1.message = `ライスケール${lieScoreItems.length}項目中、5点が${fiveCount}個、平均${avg.toFixed(1)}。自己呈示傾向がやや見られる`;
+    }
+    sig1.lieScoreItems = lieScoreItems;
+    sig1.avg = avg.toFixed(2);
+    sig1.fiveCount = fiveCount;
+  }
+
+  // ========== シグナル2: 低スコア欠如 ==========
+  const sig2 = { flag: false, severity: 'none', message: '', score: 0 };
+  const total = data.scores.length;
+  const lowCount = data.scores.filter(s => s <= 2).length;
+  const lowRatio = lowCount / total;
+
+  if (total >= 15 && lowCount === 0) {
+    sig2.flag = true;
+    sig2.severity = 'high';
+    sig2.score = 2;
+    sig2.message = `${total}問中、1点・2点の回答が0個。自分の弱みや苦手を一切認めていない`;
+  } else if (total >= 20 && lowRatio < 0.05) {
+    sig2.flag = true;
+    sig2.severity = 'medium';
+    sig2.score = 1;
+    sig2.message = `低スコア(1-2点)が${(lowRatio*100).toFixed(0)}%のみ。自己呈示傾向あり`;
+  }
+  sig2.lowCount = lowCount;
+  sig2.total = total;
+
+  // ========== シグナル3: 5と3に集中(二値的回答パターン) ==========
+  const sig3 = { flag: false, severity: 'none', message: '', score: 0 };
+  const dist = {
+    1: data.scores.filter(s => s === 1).length,
+    2: data.scores.filter(s => s === 2).length,
+    3: data.scores.filter(s => s === 3).length,
+    4: data.scores.filter(s => s === 4).length,
+    5: data.scores.filter(s => s === 5).length,
+  };
+  const fiveRatio = dist[5] / total;
+  const threeRatio = dist[3] / total;
+  const fourRatio = dist[4] / total;
+  const lowR = (dist[1] + dist[2]) / total;
+
+  if (fiveRatio > 0.5 && threeRatio > 0.2 && fourRatio < 0.15 && lowR < 0.05) {
+    sig3.flag = true;
+    sig3.severity = 'high';
+    sig3.score = 3;
+    sig3.message = `5点(${dist[5]}問)と3点(${dist[3]}問)に極端に集中。「自信ある項目は満点/不利な項目は中立で逃げる」戦略的回答の可能性`;
+  }
+  sig3.distribution = dist;
+
+  // ========== シグナル4: 戦略的中立(3点が不利設問に偏る) ==========
+  const sig4 = { flag: false, severity: 'none', message: '', score: 0 };
+  const threeItems = [];
+  const riskyThreeItems = [];
+
+  data.scores.forEach((score, i) => {
+    if (score === 3) {
+      const cls = classMap[i];
+      const label = (cls && cls.label) || data.questionLabels[i] || `Q${i+1}`;
+      const isRisky = cls ? cls.is_socially_risky : heuristicClassify(label).isSociallyRisky;
+      threeItems.push({ index: i + 1, label, isRisky });
+      if (isRisky) riskyThreeItems.push({ index: i + 1, label });
+    }
+  });
+
+  if (threeItems.length >= 3) {
+    const riskyRatio = riskyThreeItems.length / threeItems.length;
+    if (riskyRatio >= 0.7) {
+      sig4.flag = true;
+      sig4.severity = 'high';
+      sig4.score = 3;
+      sig4.message = `3点回答${threeItems.length}問のうち${riskyThreeItems.length}問(${(riskyRatio*100).toFixed(0)}%)が「不利に見える設問」。戦略的に中立で逃げている可能性が高い`;
+    } else if (riskyRatio >= 0.5) {
+      sig4.flag = true;
+      sig4.severity = 'medium';
+      sig4.score = 1;
+      sig4.message = `3点回答の${(riskyRatio*100).toFixed(0)}%が不利設問に偏る。やや戦略的な回答傾向`;
+    }
+    sig4.threeItems = threeItems;
+    sig4.riskyThreeItems = riskyThreeItems;
+  }
+
+  // ========== 統合判定 ==========
+  const flags = [];
+  if (sig1.flag) flags.push(sig1.message);
+  if (sig2.flag) flags.push(sig2.message);
+  if (sig3.flag) flags.push(sig3.message);
+  if (sig4.flag) flags.push(sig4.message);
+
+  const totalRisk = sig1.score + sig2.score + sig3.score + sig4.score;
+
+  let level, levelLabel;
+  if (totalRisk >= 6) {
+    level = 'low';
+    levelLabel = '🚨 信頼性 低';
+  } else if (totalRisk >= 3) {
+    level = 'medium';
+    levelLabel = '⚠️ 信頼性 中';
+  } else {
+    level = 'high';
+    levelLabel = '✅ 信頼性 高';
+  }
+
+  return {
+    level,
+    levelLabel,
+    totalRisk,
+    maxRisk: 11,
+    flags,
+    signals: { sig1, sig2, sig3, sig4 },
+    lieScoreItems,
+  };
+}
+
+// ============================================================
+// Category Score Calculation
+// ============================================================
+const CATEGORY_LABELS = {
+  interpersonal: '対人・コミュニケーション',
+  stress_tolerance: 'ストレス耐性・安定性',
+  cooperation: '協調性・チームワーク',
+  work_aptitude: '業務適性(正確性・成長)',
+  retention: '定着・勤怠',
+  lie_scale: 'ライスケール',
+  uncategorized: '未分類',
+};
+
+function calculateCategoryScores(data, classification) {
+  const classMap = {};
+  if (classification) {
+    classification.forEach(c => { classMap[c.index - 1] = c; });
+  }
+
+  const categories = {};
+  data.scores.forEach((score, i) => {
+    const cls = classMap[i];
+    const category = cls ? cls.category : heuristicClassify(data.questionLabels[i] || '').category;
+    const label = (cls && cls.label) || data.questionLabels[i] || `Q${i+1}`;
+
+    if (!categories[category]) {
+      categories[category] = { scores: [], questions: [] };
+    }
+    categories[category].scores.push(score);
+    categories[category].questions.push({ index: i + 1, label, score });
+  });
+
+  const result = {};
+  for (const [key, d] of Object.entries(categories)) {
+    const sum = d.scores.reduce((a, b) => a + b, 0);
+    const max = d.scores.length * 5;
+    result[key] = {
+      key,
+      label: CATEGORY_LABELS[key] || key,
+      scores: d.scores,
+      questions: d.questions,
+      sum,
+      avg: (sum / d.scores.length).toFixed(2),
+      max,
+      achievementRate: ((sum / max) * 100).toFixed(0),
+    };
+  }
+  return result;
+}
+
+// ============================================================
+// Render Preview
+// ============================================================
+function renderScorePreview(data, nameEl, dateEl, scoresEl, reliabilityContainer, classification) {
   nameEl.textContent = `${data.name} さん`;
   dateEl.textContent = data.timestamp ? `回答日時: ${data.timestamp}` : '';
+
+  // Reliability badge (if container provided)
+  if (reliabilityContainer && classification !== undefined) {
+    const reliability = calculateReliability(data, classification);
+    candidateReliability = reliability;
+
+    let html = `<span class="reliability-badge ${reliability.level}">${reliability.levelLabel}</span>`;
+    html += `<span style="font-size:11px; color:#86868b;">リスクスコア ${reliability.totalRisk}/${reliability.maxRisk}</span>`;
+
+    if (reliability.flags.length > 0) {
+      html += `<div class="reliability-detail">`;
+      html += `<strong style="font-size:12px;">検出された問題:</strong>`;
+      reliability.flags.forEach(f => {
+        html += `<div class="flag-item">${f}</div>`;
+      });
+      html += `</div>`;
+    }
+
+    reliabilityContainer.innerHTML = html;
+  }
+
+  // Score grid
+  const classMap = {};
+  if (classification) {
+    classification.forEach(c => { classMap[c.index - 1] = c; });
+  }
 
   scoresEl.innerHTML = '';
   data.scores.forEach((score, i) => {
     const div = document.createElement('div');
     div.className = 'parsed-score-item';
+    const cls = classMap[i];
+    const isLieScale = cls ? cls.is_lie_scale : heuristicClassify(data.questionLabels[i] || '').isLieScale;
+    if (isLieScale) div.classList.add('lie-scale');
+
     const colorClass = score >= 4 ? 'high' : score >= 3 ? 'mid' : 'low';
     const label = `Q${i+1}`;
     const tooltip = data.questionLabels[i] || `Q${i+1}`;
@@ -422,11 +767,12 @@ function renderScorePreview(data, nameEl, dateEl, scoresEl) {
   });
 }
 
-// ===== Paste Area Setup =====
+// ============================================================
+// Paste Area Setup
+// ============================================================
 function setupPasteAreas() {
-  // Candidate paste
   const candidateInput = document.getElementById('pasteInput');
-  const handleCandidate = () => {
+  const handleCandidate = async () => {
     const result = parseSpreadsheet(candidateInput.value);
     const msgEl = document.getElementById('parseMessage');
     const previewEl = document.getElementById('parsedPreview');
@@ -435,6 +781,8 @@ function setupPasteAreas() {
       msgEl.innerHTML = '';
       previewEl.classList.add('hidden');
       parsedCandidate = null;
+      candidateClassification = null;
+      candidateReliability = null;
       return;
     }
     if (!result || result.error) {
@@ -445,18 +793,34 @@ function setupPasteAreas() {
     }
 
     parsedCandidate = result;
-    msgEl.innerHTML = `<div class="parse-success">読み取り完了: <strong>${result.name}</strong> さん（${result.scores.length}問）</div>`;
+    candidateClassification = null;
+    candidateReliability = null;
+
+    msgEl.innerHTML = `<div class="parse-success">読み取り完了: <strong>${result.name}</strong> さん(${result.scores.length}問)<br><span style="font-size:12px; color:#86868b;">※ 信頼性は「生成」ボタン実行時に詳細判定されます(この時点では簡易判定)</span></div>`;
     previewEl.classList.remove('hidden');
-    renderScorePreview(result,
+
+    // ヒューリスティックで仮分類してプレビュー表示
+    const heuristicClass = result.questionLabels.map((label, i) => ({
+      index: i + 1,
+      label,
+      ...(() => {
+        const h = heuristicClassify(label);
+        return { category: h.category, is_lie_scale: h.isLieScale, is_socially_risky: h.isSociallyRisky };
+      })(),
+    }));
+
+    renderScorePreview(
+      result,
       document.getElementById('parsedName'),
       document.getElementById('parsedDate'),
-      document.getElementById('parsedScores')
+      document.getElementById('parsedScores'),
+      document.getElementById('reliabilityBadgeContainer'),
+      heuristicClass
     );
   };
   candidateInput.addEventListener('input', handleCandidate);
   candidateInput.addEventListener('paste', () => setTimeout(handleCandidate, 50));
 
-  // Director paste
   const directorInput = document.getElementById('directorPasteInput');
   const handleDirector = () => {
     const result = parseSpreadsheet(directorInput.value);
@@ -477,19 +841,24 @@ function setupPasteAreas() {
     }
 
     parsedDirector = result;
-    msgEl.innerHTML = `<div class="parse-success">読み取り完了: <strong>${result.name}</strong> 院長（${result.scores.length}問）</div>`;
+    msgEl.innerHTML = `<div class="parse-success">読み取り完了: <strong>${result.name}</strong> 院長(${result.scores.length}問)</div>`;
     previewEl.classList.remove('hidden');
-    renderScorePreview(result,
+    renderScorePreview(
+      result,
       document.getElementById('directorParsedName'),
       document.getElementById('directorParsedDate'),
-      document.getElementById('directorParsedScores')
+      document.getElementById('directorParsedScores'),
+      null,
+      null
     );
   };
   directorInput.addEventListener('input', handleDirector);
   directorInput.addEventListener('paste', () => setTimeout(handleDirector, 50));
 }
 
-// ===== Tabs =====
+// ============================================================
+// Tabs
+// ============================================================
 function switchTab(tab) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -498,7 +867,9 @@ function switchTab(tab) {
   if (tab === 'generate') updateSummary();
 }
 
-// ===== Clinic Templates =====
+// ============================================================
+// Clinic Templates
+// ============================================================
 function getClinicData() {
   return {
     clinicName: document.getElementById('clinicName').value,
@@ -511,6 +882,7 @@ function getClinicData() {
     directorData: parsedDirector || null,
   };
 }
+
 function setClinicData(data) {
   document.getElementById('clinicName').value = data.clinicName || '';
   document.getElementById('doctorName').value = data.doctorName || '';
@@ -519,7 +891,7 @@ function setClinicData(data) {
   document.getElementById('idealCandidate').value = data.idealCandidate || '';
   document.getElementById('workEnvironment').value = data.workEnvironment || '';
   document.getElementById('managementStyle').value = data.managementStyle || '';
-  // 院長データを復元
+
   if (data.directorData) {
     parsedDirector = data.directorData;
     document.getElementById('directorPasteInput').value = '';
@@ -528,10 +900,11 @@ function setClinicData(data) {
       parsedDirector,
       document.getElementById('directorParsedName'),
       document.getElementById('directorParsedDate'),
-      document.getElementById('directorParsedScores')
+      document.getElementById('directorParsedScores'),
+      null, null
     );
     document.getElementById('directorParseMessage').innerHTML =
-      `<div class="parse-success">読み取り済み: <strong>${parsedDirector.name}</strong> 院長（${parsedDirector.scores.length}問）</div>`;
+      `<div class="parse-success">読み取り済み: <strong>${parsedDirector.name}</strong> 院長(${parsedDirector.scores.length}問)</div>`;
     document.getElementById('directorSection').open = true;
   } else {
     parsedDirector = null;
@@ -540,9 +913,8 @@ function setClinicData(data) {
     document.getElementById('directorParseMessage').innerHTML = '';
   }
 }
-// ===== Worker経由: clinics.json を取得 =====
+
 async function fetchClinicsFromGitHub() {
-  // Worker URLが未設定の場合はスキップ
   if (WORKER_URL === 'YOUR_WORKER_URL_HERE') {
     clinicsData = {};
     clinicsFileSha = null;
@@ -564,7 +936,6 @@ async function fetchClinicsFromGitHub() {
   }
 }
 
-// ===== Worker経由: clinics.json を更新 =====
 async function saveClinicsToGitHub() {
   if (WORKER_URL === 'YOUR_WORKER_URL_HERE') {
     throw new Error('Worker URLが未設定です。HTMLファイル内の WORKER_URL を設定してください。');
@@ -586,7 +957,6 @@ async function saveClinicsToGitHub() {
   clinicsFileSha = data.content.sha;
 }
 
-// ===== 医院テンプレート: セレクトボックスを再描画 =====
 function renderClinicSelect() {
   const select = document.getElementById('clinicTemplate');
   const current = select.value;
@@ -599,7 +969,6 @@ function renderClinicSelect() {
   if (current) select.value = current;
 }
 
-// ===== 医院テンプレート: 読み込み（起動時） =====
 async function loadClinicTemplates() {
   const saveBtn = document.querySelector('.btn-template-save');
   const delBtn  = document.querySelector('.btn-template-delete');
@@ -611,14 +980,12 @@ async function loadClinicTemplates() {
   if (delBtn)  delBtn.disabled  = false;
 }
 
-// ===== 医院テンプレート: 選択して読み込み =====
 function loadClinicTemplate() {
   const name = document.getElementById('clinicTemplate').value;
   if (!name) return;
   if (clinicsData[name]) setClinicData(clinicsData[name]);
 }
 
-// ===== 医院テンプレート: 保存 =====
 async function saveClinicTemplate() {
   const data = getClinicData();
   if (!data.clinicName) { alert('医院名を入力してください'); return; }
@@ -641,11 +1008,10 @@ async function saveClinicTemplate() {
   }
 }
 
-// ===== 医院テンプレート: 削除 =====
 async function deleteClinicTemplate() {
   const name = document.getElementById('clinicTemplate').value;
   if (!name) { alert('削除する医院を選択してください'); return; }
-  if (!confirm(`「${name}」を削除しますか？`)) return;
+  if (!confirm(`「${name}」を削除しますか?`)) return;
 
   const delBtn = document.querySelector('.btn-template-delete');
   const origText = delBtn ? delBtn.textContent : '';
@@ -665,7 +1031,9 @@ async function deleteClinicTemplate() {
   }
 }
 
-// ===== Summary =====
+// ============================================================
+// Summary
+// ============================================================
 function updateSummary() {
   const clinic = getClinicData();
   const cName = parsedCandidate ? parsedCandidate.name : '未入力';
@@ -678,98 +1046,156 @@ function updateSummary() {
   document.getElementById('summaryContent').innerHTML = `
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
       <div><strong style="color:#86868b; font-size:12px;">医院</strong><br>${clinic.clinicName || '未入力'}</div>
-      <div><strong style="color:#86868b; font-size:12px;">候補者</strong><br>${cName}（${role}）- ${cScores}問</div>
-      <div><strong style="color:#86868b; font-size:12px;">院長診断</strong><br>${parsedDirector ? `${dName} - ${dScores}問` : 'なし（スキップ）'}</div>
+      <div><strong style="color:#86868b; font-size:12px;">候補者</strong><br>${cName}(${role}) - ${cScores}問</div>
+      <div><strong style="color:#86868b; font-size:12px;">院長診断</strong><br>${parsedDirector ? `${dName} - ${dScores}問` : 'なし(スキップ)'}</div>
       <div><strong style="color:#86868b; font-size:12px;">実施日</strong><br>${cDate}</div>
     </div>
   `;
 }
 
-// ===== Build score text from parsed data =====
-function buildScoreText(data) {
+// ============================================================
+// Build Structured Prompt
+// ============================================================
+function buildCategoryText(categoryScores) {
   let text = '';
-  data.scores.forEach((score, i) => {
-    const label = data.questionLabels[i] || `Q${i+1}`;
-    text += `${label}：${score}/5\n`;
+  const order = ['interpersonal', 'stress_tolerance', 'cooperation', 'work_aptitude', 'retention', 'lie_scale', 'uncategorized'];
+  order.forEach(key => {
+    const cat = categoryScores[key];
+    if (!cat) return;
+    text += `\n■ ${cat.label}(平均 ${cat.avg}/5.0、達成率 ${cat.achievementRate}%)\n`;
+    cat.questions.forEach(q => {
+      text += `  - Q${q.index} ${q.label}: ${q.score}/5\n`;
+    });
   });
   return text;
 }
 
-// ===== Build Prompt =====
-function buildPrompt() {
+function buildReliabilityText(reliability) {
+  let text = `\n【信頼性判定(事前算定済み・この結果をレポートに必ず反映すること)】\n`;
+  text += `- 判定レベル: ${reliability.levelLabel} (${reliability.level.toUpperCase()})\n`;
+  text += `- 総合リスクスコア: ${reliability.totalRisk}/${reliability.maxRisk}\n`;
+  text += `- 検出シグナル数: ${reliability.flags.length}/4\n\n`;
+
+  if (reliability.flags.length > 0) {
+    text += `検出された問題:\n`;
+    reliability.flags.forEach((f, i) => {
+      text += `${i+1}. ${f}\n`;
+    });
+  } else {
+    text += `検出された問題: なし(誠実な回答と判断)\n`;
+  }
+
+  // ライスケール詳細
+  if (reliability.lieScoreItems && reliability.lieScoreItems.length > 0) {
+    text += `\nライスケール該当設問(${reliability.lieScoreItems.length}問):\n`;
+    reliability.lieScoreItems.forEach(q => {
+      text += `  - Q${q.index} ${q.label}: ${q.score}/5\n`;
+    });
+  }
+
+  // シグナル3詳細
+  if (reliability.signals.sig3.flag) {
+    const d = reliability.signals.sig3.distribution;
+    text += `\n回答分布: 1点=${d[1]}, 2点=${d[2]}, 3点=${d[3]}, 4点=${d[4]}, 5点=${d[5]}\n`;
+  }
+
+  // シグナル4詳細
+  if (reliability.signals.sig4.flag && reliability.signals.sig4.riskyThreeItems) {
+    text += `\n戦略的中立(3点)と判定された設問:\n`;
+    reliability.signals.sig4.riskyThreeItems.forEach(q => {
+      text += `  - Q${q.index} ${q.label}\n`;
+    });
+  }
+
+  return text;
+}
+
+function buildPrompt(categoryScores, reliability) {
   const clinic = getClinicData();
   const name = parsedCandidate.name;
   const role = document.getElementById('candidateRole').value;
   const date = parsedCandidate.diagDate || parsedCandidate.timestamp;
   const hearingMemo = document.getElementById('hearingMemo').value;
-  const numQ = parsedCandidate.scores.length;
 
-  let candidateScoreText = buildScoreText(parsedCandidate);
+  // ランク上限ルール
+  let rankCap = '';
+  if (reliability.level === 'low') {
+    rankCap = '\n⚠️ 信頼性が「低」のため、採用ランクは最高でも B+ までとすること。素点が高くてもS/Aは付与しない。面接での実例確認を必須と明記すること。';
+  } else if (reliability.level === 'medium') {
+    rankCap = '\n⚠️ 信頼性が「中」のため、採用ランクが A 以上の場合は必ず「面接での実例確認が必須」と明記すること。';
+  }
 
   let directorSection = '';
   if (parsedDirector) {
+    let dScoreText = '';
+    parsedDirector.scores.forEach((s, i) => {
+      const label = parsedDirector.questionLabels[i] || `Q${i+1}`;
+      dScoreText += `  - ${label}: ${s}/5\n`;
+    });
     directorSection = `
-
 ---
 
 # 院長の性格診断データ
 
-氏名：${parsedDirector.name}
-診断実施日：${parsedDirector.diagDate || parsedDirector.timestamp || '不明'}
+氏名:${parsedDirector.name}
+診断実施日:${parsedDirector.diagDate || parsedDirector.timestamp || '不明'}
+設問数:${parsedDirector.scores.length}問
 
-【院長の性格診断スコア（${parsedDirector.scores.length}問）】
-${buildScoreText(parsedDirector)}
+【院長のスコア】
+${dScoreText}
 
 ※ 院長のスコアと候補者のスコアを比較し、性格の相性・補完関係を分析してください。`;
   }
 
-  let candidateSection = `氏名：${name}
-職種：${role}
-診断実施日：${date}
-
-【性格診断スコア（${numQ}問）】
-${candidateScoreText}`;
-
-  if (hearingMemo) {
-    candidateSection += `\n【電話ヒアリングメモ】\n${hearingMemo}`;
-  }
+  const categoryText = buildCategoryText(categoryScores);
+  const reliabilityText = buildReliabilityText(reliability);
 
   return `# 指示
 
 あなたは優秀な採用コンサルタントです。
 
-以下の「歯科医院情報」「候補者データ」${parsedDirector ? '「院長の性格診断データ」' : ''}を元に、指定の「出力フォーマット」に従って性格診断レポートを作成してください。
-
-※ 設問の中に「一度もない」「全く〜ない」「ほとんどない」のような極端な表現を含む設問がある場合、それはライスケール（虚偽検出）項目です。これらのスコアが高い場合は「自分を良く見せようとしている傾向」として信頼性チェックに反映してください。
-${parsedDirector ? '※ 院長の性格診断データが提供されている場合、候補者との性格の相性・補完関係も分析してください。' : ''}
+【重要】以下のデータは、事前にシステム側でカテゴリ分類・信頼性判定を完了しています。
+あなたの役割は「計算」ではなく「解釈とアドバイス」です。
+事前算定された信頼性レベル・カテゴリ別スコアをそのまま使用し、独自に再計算・再分類しないでください。
+${rankCap}
 
 ---
 
 # 歯科医院情報
 
-【医院名】：${clinic.clinicName}
-【院長名】：${clinic.doctorName}
-【診療内容・得意分野】：${clinic.clinicSpecialty}
-【医院の雰囲気・文化】：${clinic.clinicCulture}
-【求める人物像】：${clinic.idealCandidate}
-【職場環境の特徴】：${clinic.workEnvironment}
-【院長のマネジメントスタイル】：${clinic.managementStyle}
+【医院名】:${clinic.clinicName}
+【院長名】:${clinic.doctorName}
+【診療内容・得意分野】:${clinic.clinicSpecialty}
+【医院の雰囲気・文化】:${clinic.clinicCulture}
+【求める人物像】:${clinic.idealCandidate}
+【職場環境の特徴】:${clinic.workEnvironment}
+【院長のマネジメントスタイル】:${clinic.managementStyle}
 ${directorSection}
 
 ---
 
 # 候補者データ
 
-${candidateSection}
+氏名:${name}
+職種:${role}
+診断実施日:${date}
+設問数:${parsedCandidate.scores.length}問
+
+## カテゴリ別スコア(事前算定済み)
+${categoryText}
+
+## 信頼性チェック結果(事前算定済み)
+${reliabilityText}
+
+${hearingMemo ? `## 電話ヒアリングメモ\n${hearingMemo}\n` : ''}
 
 ---
 
-# 出力フォーマット（Markdown形式）
+# 出力フォーマット(Markdown形式)
 
 以下の形式を厳守してください。Notionに貼り付けできるMarkdown形式で出力してください。
-設問の内容に応じて、適切なカテゴリに分類して分析してください。
 
-📄 性格診断レポート：${name} 様
+📄 性格診断レポート:${name} 様
 
 ## 基本情報
 
@@ -778,13 +1204,13 @@ ${candidateSection}
 | 実施日 | ${date} |
 | 職種 | ${role} |
 
-## 1. 総評（採用推奨度）
+## 1. 総評(採用推奨度)
 
-🏅 ランク：[S〜Cで判定] （[一言キャッチコピー]）
+🏅 ランク:[S〜Cで判定、信頼性に応じた上限ルール厳守] ([一言キャッチコピー])
 
 **判定コメント:**
 
-[性格の全体像と、その職種への適性を3〜4行で記述。特に${clinic.clinicName}の「${clinic.clinicCulture}」に耐えうる資質があるか、プロ意識の観点から記述してください]
+[性格の全体像と、その職種への適性を3〜4行で記述。信頼性レベルが中/低の場合は必ず面接で確認すべき点に言及すること]
 
 ## 2. 医院との相性スコア
 
@@ -810,31 +1236,31 @@ ${parsedDirector ? `
 ` : ''}
 ## 3. 離職リスク・定着可能性分析
 
-**定着見込み：**[高 / 中（条件付き）/ 低]
+**定着見込み:**[高 / 中(条件付き) / 低]
 
 [全体的な定着傾向を2行程度で要約]
 
-### 🚩 離職のトリガー（こうなると辞める）
+### 🚩 離職のトリガー(こうなると辞める)
 
-- **[トリガー名]**：[該当する設問の数値に基づいた解説]
-- **[トリガー名]**：[解説]
+- **[トリガー名]**:[該当する設問の数値に基づいた解説]
+- **[トリガー名]**:[解説]
 
-### ⚓️ 長期定着のポイント（こうすれば辞めない）
+### ⚓️ 長期定着のポイント(こうすれば辞めない)
 
-- **[対策1]**：[具体的な方法]
-- **[対策2]**：[フォロー体制]
+- **[対策1]**:[具体的な方法]
+- **[対策2]**:[フォロー体制]
 
-## 4. 性格の傾向（詳細分析）
+## 4. 性格の傾向(詳細分析)
 
 ### ■ 強み・長所
 
-- **[強み見出し]**：[解説]
-- **[強み見出し]**：[解説]
+- **[強み見出し]**:[解説]
+- **[強み見出し]**:[解説]
 
 ### ■ 注意点・懸念点
 
-- **[懸念点見出し]**：[解説]
-- **[懸念点見出し]**：[解説]
+- **[懸念点見出し]**:[解説]
+- **[懸念点見出し]**:[解説]
 
 ### ■ 行動特性チャート
 
@@ -845,25 +1271,27 @@ ${parsedDirector ? `
 | 規律性 | [高/中/低] | [補足説明] |
 | 感情制御 | [高/中/低] | [補足説明] |
 
-## 5. 育成方針（マネジメントガイド）
+## 5. 育成方針(マネジメントガイド)
 
 ### 🌱 入職初期の指導ポイント
 
-- **教え方**：[${clinic.clinicName}の環境をどう伝えるか]
-- **接し方**：[声掛けの頻度や距離感]
+- **教え方**:[${clinic.clinicName}の環境をどう伝えるか]
+- **接し方**:[声掛けの頻度や距離感]
 
 ### 🌳 長期的な活躍のために
 
-- **キャリアパス**：[どのような専門性や役割を提示すべきか]
+- **キャリアパス**:[どのような専門性や役割を提示すべきか]
 
-## 6. 面談の際の質問（離職リスク・本音確認用）
+## 6. 面談の際の質問(離職リスク・本音確認用)
+
+※ 信頼性判定で検出された問題点を面接で検証する質問を必ず含めること。
 
 ### Q1. [確認項目名] の確認
 
 ❓ 「[具体的な質問文]」
 
 - **意図**: [何を見極めるか]
-- **回答例（理想）**: [期待する回答]
+- **回答例(理想)**: [期待する回答]
 - **NG回答**: [注意すべき回答]
 
 ### Q2. [確認項目名] の確認
@@ -871,28 +1299,44 @@ ${parsedDirector ? `
 ❓ 「[具体的な質問文]」
 
 - **意図**: [何を見極めるか]
-- **回答例（理想）**: [期待する回答]
+- **回答例(理想)**: [期待する回答]
 - **NG回答**: [注意すべき回答]
 
-## ℹ️ データの信頼性チェック
+${reliability.level !== 'high' ? `### Q3. 信頼性検証用の実例確認
 
-**虚偽回答（ライスケール）**: ✅ [判定結果]
+❓ 「[信頼性シグナルで検出された問題を検証する質問]」
 
-[極端な表現を含む設問のスコアを分析し、回答の信頼性を評価]
+- **意図**: [事前算定された信頼性シグナルのどれを検証するか明記]
+- **回答例(理想)**: [具体的な実例を語れる]
+- **NG回答**: [抽象論や「特になし」など]
+
+` : ''}## ℹ️ データの信頼性チェック
+
+**虚偽回答(ライスケール)**: ${reliability.levelLabel}
+
+**総合リスクスコア**: ${reliability.totalRisk}/${reliability.maxRisk}
+
+${reliability.flags.length > 0 ? `**検出された問題**:
+${reliability.flags.map((f, i) => `${i+1}. ${f}`).join('\n')}
+
+**解釈**:
+[上記の検出結果をふまえ、回答の信頼性をどう解釈するか、採用判断にどう反映すべきかを3〜4行で記述]` : '**解釈**: 極端な自己呈示バイアスは検出されず、誠実な回答と判断できる'}
 
 ## 📊 スコア別詳細分析
 
-[提供された設問を内容に基づいて適切なカテゴリ（対人・コミュニケーション / ホスピタリティ・協調性 / 実務遂行・正確性 / メンタルタフネス・安定性 / ライスケール 等）に分類し、それぞれの平均スコアと分析を記述してください]
+[事前算定済みのカテゴリ別スコアを使用すること。独自の再分類は行わない。各カテゴリごとに平均スコアと分析を記述]
 
 ## 💡 採用後の「配置」アドバイス
 
-- **最適なポジション**：[具体的な業務内容]
-- **避けるべき環境**：[早期離職を招く恐れのある状況]`;
+- **最適なポジション**:[具体的な業務内容]
+- **避けるべき環境**:[早期離職を招く恐れのある状況]`;
 }
 
-// ===== Generate Report =====
+// ============================================================
+// Generate Report (2段階)
+// ============================================================
 async function generateReport() {
-  if (!WORKER_URL || WORKER_URL === 'YOUR_WORKER_URL_HERE') { showError('Worker URLが設定されていません。HTMLファイル内の WORKER_URL を更新してください。'); return; }
+  if (!WORKER_URL || WORKER_URL === 'YOUR_WORKER_URL_HERE') { showError('Worker URLが設定されていません。'); return; }
   if (!document.getElementById('clinicName').value) { showError('医院名を入力してください。'); return; }
   if (!parsedCandidate) { showError('候補者のスプレッドシートデータを貼り付けてください。'); return; }
 
@@ -900,6 +1344,9 @@ async function generateReport() {
   const loading = document.getElementById('loading');
   const resultArea = document.getElementById('resultArea');
   const errorMsg = document.getElementById('errorMsg');
+  const step1 = document.getElementById('loadingStep1');
+  const step2 = document.getElementById('loadingStep2');
+  const step3 = document.getElementById('loadingStep3');
 
   btn.disabled = true;
   btn.style.display = 'none';
@@ -908,33 +1355,88 @@ async function generateReport() {
   errorMsg.classList.remove('active');
 
   try {
+    // === Step 1: AI分類 ===
+    step1.classList.add('current');
+    let classification;
+    try {
+      if (parsedCandidate.questionLabels && parsedCandidate.questionLabels.length > 0) {
+        classification = await classifyQuestionsWithAI(parsedCandidate.questionLabels);
+      } else {
+        // ヘッダーなし → ヒューリスティックのみ
+        classification = parsedCandidate.scores.map((_, i) => ({
+          index: i + 1,
+          label: `Q${i+1}`,
+          category: 'uncategorized',
+          is_lie_scale: false,
+          is_socially_risky: false,
+        }));
+      }
+    } catch (e) {
+      console.warn('AI分類失敗、ヒューリスティックにフォールバック:', e);
+      classification = parsedCandidate.questionLabels.map((label, i) => {
+        const h = heuristicClassify(label);
+        return {
+          index: i + 1, label,
+          category: h.category,
+          is_lie_scale: h.isLieScale,
+          is_socially_risky: h.isSociallyRisky,
+        };
+      });
+    }
+    candidateClassification = classification;
+    step1.classList.remove('current');
+
+    // === Step 2: 信頼性判定・カテゴリスコア計算 ===
+    step2.classList.add('current');
+    const reliability = calculateReliability(parsedCandidate, classification);
+    const categoryScores = calculateCategoryScores(parsedCandidate, classification);
+    candidateReliability = reliability;
+    step2.classList.remove('current');
+
+    // === Step 3: レポート生成 ===
+    step3.classList.add('current');
     const response = await fetch(`${WORKER_URL}/api/generate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 8000,
-        messages: [{ role: 'user', content: buildPrompt() }]
+        messages: [{ role: 'user', content: buildPrompt(categoryScores, reliability) }]
       })
     });
 
     if (!response.ok) {
       const err = await response.json().catch(() => ({}));
-      if (response.status === 401) throw new Error('APIキーが無効です。正しいキーを設定してください。');
-      if (response.status === 429) throw new Error('APIのレート制限に達しました。少し待ってから再試行してください。');
+      if (response.status === 401) throw new Error('APIキーが無効です。');
+      if (response.status === 429) throw new Error('APIのレート制限に達しました。');
       throw new Error(err.error?.message || `API Error: ${response.status}`);
     }
 
     const data = await response.json();
-    const reportText = data.content[0].text;
+    let reportText = data.content[0].text;
+    step3.classList.remove('current');
 
-    window.reportMarkdown = reportText;
-    window.reportHtml = markdownToHtml(reportText);
+    // === 後処理: ランク整合性チェック ===
+    const rankMatch = reportText.match(/ランク[::]\s*([SABC][+\-]?)/);
+    const rank = rankMatch ? rankMatch[1] : null;
+    let warningBanner = '';
+
+    if (reliability.level === 'low' && rank && /^[SA]/.test(rank)) {
+      warningBanner = `> ⚠️ **警告**: ライスケール信頼性が「低」ですが、AIがランク${rank}を付与しています。\n> 素点を過大評価している可能性があるため、必ず面接で実例ベースの確認を行ってください。\n\n`;
+    } else if (reliability.level === 'medium' && rank && /^S/.test(rank)) {
+      warningBanner = `> ⚠️ **注意**: ライスケール信頼性が「中」でSランク判定です。面接での実例確認を重視してください。\n\n`;
+    }
+
+    window.reportMarkdown = warningBanner + reportText;
+    window.reportHtml = markdownToHtml(window.reportMarkdown);
     document.getElementById('resultContent').innerHTML = window.reportHtml;
     resultArea.classList.add('active');
 
   } catch (error) {
     showError(error.message);
+    step1.classList.remove('current');
+    step2.classList.remove('current');
+    step3.classList.remove('current');
   } finally {
     loading.classList.remove('active');
     btn.disabled = false;
@@ -948,7 +1450,9 @@ function showError(msg) {
   el.classList.add('active');
 }
 
-// ===== Markdown to HTML converter =====
+// ============================================================
+// Markdown to HTML
+// ============================================================
 function markdownToHtml(md) {
   let html = md;
   html = html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -956,6 +1460,11 @@ function markdownToHtml(md) {
   html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
   html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
   html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+
+  // Blockquote(警告バナー用)
+  html = html.replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>');
+
+  // Tables
   html = html.replace(/^(\|.+\|)\n\|[-| :]+\|\n((?:\|.+\|\n?)*)/gm, (match, headerRow, bodyRows) => {
     const headers = headerRow.split('|').filter(c => c.trim()).map(c => `<th>${c.trim()}</th>`).join('');
     const rows = bodyRows.trim().split('\n').map(row => {
@@ -964,15 +1473,18 @@ function markdownToHtml(md) {
     }).join('');
     return `<table><thead><tr>${headers}</tr></thead><tbody>${rows}</tbody></table>\n`;
   });
+
   html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
   html = html.replace(/((?:<li>.*<\/li>\n?)+)/g, '<ul>$1</ul>');
   html = html.replace(/^---$/gm, '<hr>');
-  html = html.replace(/^(?!<[hultdao]|<\/|<hr|<str)(.+)$/gm, '<p>$1</p>');
+  html = html.replace(/^(?!<[hultdao]|<\/|<hr|<str|<block)(.+)$/gm, '<p>$1</p>');
   html = html.replace(/<p>\s*<\/p>/g, '');
   return html;
 }
 
-// ===== Copy as rich text for Notion =====
+// ============================================================
+// Copy / Reset
+// ============================================================
 async function copyResult() {
   if (!window.reportHtml) return;
   try {
@@ -982,7 +1494,7 @@ async function copyResult() {
       new ClipboardItem({ 'text/html': blob, 'text/plain': textBlob })
     ]);
     const btn = document.getElementById('copyBtn');
-    btn.textContent = 'コピーしました！';
+    btn.textContent = 'コピーしました!';
     btn.classList.add('copied');
     setTimeout(() => { btn.textContent = 'Notionにコピー'; btn.classList.remove('copied'); }, 2000);
   } catch (e) {
@@ -991,12 +1503,12 @@ async function copyResult() {
       ta.value = window.reportMarkdown;
       document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
     }
-    document.getElementById('copyBtn').textContent = 'コピーしました！';
+    document.getElementById('copyBtn').textContent = 'コピーしました!';
   }
 }
 
 function resetResult() {
-  if (!confirm('新しいレポートを作成しますか？候補者情報がリセットされます。')) return;
+  if (!confirm('新しいレポートを作成しますか?候補者情報がリセットされます。')) return;
   document.getElementById('pasteInput').value = '';
   document.getElementById('parseMessage').innerHTML = '';
   document.getElementById('parsedPreview').classList.add('hidden');
@@ -1004,6 +1516,8 @@ function resetResult() {
   document.getElementById('hearingMemo').value = '';
   document.getElementById('resultArea').classList.remove('active');
   parsedCandidate = null;
+  candidateClassification = null;
+  candidateReliability = null;
   window.reportMarkdown = null;
   window.reportHtml = null;
   switchTab('candidate');
